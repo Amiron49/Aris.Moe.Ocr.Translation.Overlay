@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using ImGuiNET;
 using Veldrid;
+using PixelFormat = Veldrid.PixelFormat;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace Aris.Moe.Overlay
 {
@@ -23,7 +29,9 @@ namespace Aris.Moe.Overlay
         private DeviceBuffer _indexBuffer;
         private DeviceBuffer _projMatrixBuffer;
         private Texture _fontTexture;
+        private List<Texture> _imageTextures = new List<Texture>();
         private TextureView _fontTextureView;
+        private List<TextureView> _imageTextureViews = new List<TextureView>();
         private Shader _vertexShader;
         private Shader _fragmentShader;
         private ResourceLayout _layout;
@@ -64,8 +72,10 @@ namespace Aris.Moe.Overlay
 
             var context = ImGui.CreateContext();
             ImGui.SetCurrentContext(context);
-            var fonts = ImGui.GetIO().Fonts;
-            ImGui.GetIO().Fonts.AddFontDefault();
+
+            //TODO config
+            var sizePixels = 32f;
+            ImGui.GetIO().Fonts.AddFontFromFileTTF(@"E:\Projects\Aris.Moe.Ocr.Overlay.Translate.Cli\.private\NotoSansJP-Medium.otf", sizePixels, null, ImGui.GetIO().Fonts.GetGlyphRangesJapanese());
 
             CreateDeviceResources(gd, outputDescription);
             SetKeyMappings();
@@ -244,6 +254,61 @@ namespace Aris.Moe.Overlay
             }
         }
 
+        public IntPtr AddImageTexture(GraphicsDevice gd, Bitmap bitmap)
+        {
+            bitmap.Save(@"E:\Projects\Aris.Moe.Ocr.Overlay.Translate.Cli\.private\debug.jpg", ImageFormat.Jpeg);
+            
+            long size;
+            using (var ms = new MemoryStream()) // estimatedLength can be original fileLength
+            {
+                bitmap.Save(ms, ImageFormat.Bmp); // save image to stream in Jpeg format
+                size = ms.ToArray().Length;
+            }
+            
+            var bitmapData = bitmap.LockBits(new Rectangle(0,0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb );
+            var betterSize = bitmapData.Stride * bitmap.Height;
+
+            if (bitmap.PixelFormat != System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+            {
+                throw new Exception(
+                    $"Wrong pixel format {Enum.GetName(bitmap.PixelFormat.GetType(), bitmap.PixelFormat)}, expected {Enum.GetName(bitmap.PixelFormat.GetType(), System.Drawing.Imaging.PixelFormat.Format32bppArgb)}");
+            }
+
+            var imageTexture =  gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
+                (uint) bitmap.Width,
+                (uint) bitmap.Height,
+                1,
+                1,
+                PixelFormat.R32_G32_B32_A32_UInt,
+                TextureUsage.Sampled));
+            imageTexture.Name = "Image Texture";
+            
+            _imageTextures.Add(imageTexture);
+
+            // var sizeInBytes = ((32 * (uint)bitmap.Width * (uint)bitmap.Height));
+            
+            gd.UpdateTexture(
+                imageTexture,
+                bitmapData.Scan0,
+                (uint) betterSize,
+                0,
+                0,
+                0,
+                (uint) bitmap.Width / 2,
+                (uint) bitmap.Height / 2,
+                1,
+                0,
+                0);
+            
+            var imageTextureView = gd.ResourceFactory.CreateTextureView(imageTexture);
+
+            _imageTextureViews.Add(imageTextureView);
+            
+            var binding = GetOrCreateImGuiBinding(gd.ResourceFactory, imageTexture);
+
+            return binding;
+        }
+
         /// <summary>
         /// Recreates the device texture used to render text.
         /// </summary>
@@ -253,6 +318,7 @@ namespace Aris.Moe.Overlay
             // Build
             IntPtr pixels;
             int width, height, bytesPerPixel;
+
             io.Fonts.GetTexDataAsRGBA32(out pixels, out width, out height, out bytesPerPixel);
             // Store our identifier
             io.Fonts.SetTexID(_fontAtlasID);
@@ -544,6 +610,8 @@ namespace Aris.Moe.Overlay
             _projMatrixBuffer.Dispose();
             _fontTexture.Dispose();
             _fontTextureView.Dispose();
+            _imageTextures.ForEach(x => x.Dispose());
+            _imageTextureViews.ForEach(x => x.Dispose());
             _vertexShader.Dispose();
             _fragmentShader.Dispose();
             _layout.Dispose();

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Drawing;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,17 +10,25 @@ using Veldrid.StartupUtilities;
 
 namespace Aris.Moe.Overlay
 {
-    public abstract class Overlay : IDisposable
+    public abstract class ImGuiOverlay : IDisposable
     {
-        private Sdl2Window _window;
+        private volatile Sdl2Window _window;
         private GraphicsDevice _gd;
         private CommandList _cl;
         private ImGuiController _controller;
         private volatile CancellationTokenSource _cancellationTokenSource;
         private Thread _renderThread;
+        private volatile bool _ready = false;
 
         private readonly Vector3 _clearColor = new Vector3(0f, 0f, 0f);
 
+        protected volatile bool Visible = false;
+
+        public ImGuiOverlay()
+        {
+            Start().Wait();
+        }
+        
         public async Task Start()
         {
             _cancellationTokenSource = new CancellationTokenSource();
@@ -36,7 +44,7 @@ namespace Aris.Moe.Overlay
                     1920,
                     1080,
                     SDL_WindowFlags.Borderless |
-                    SDL_WindowFlags.AlwaysOnTop |
+                     SDL_WindowFlags.AlwaysOnTop |
                     SDL_WindowFlags.SkipTaskbar,
                     false);
                 _gd = VeldridStartup.CreateDefaultD3D11GraphicsDevice(
@@ -55,20 +63,33 @@ namespace Aris.Moe.Overlay
                 };
                 
 
-                _window.BorderVisible = false;
+                //_window.BorderVisible = false;
+                //_window.WindowState = WindowState.Normal;
+                Visible = true;
+                _window.Closing += () => { };
 
-                _window.Closing += () => { };    
-                
                 _cl = _gd.ResourceFactory.CreateCommandList();
                 _controller = new ImGuiController(_gd, _gd.MainSwapchain.Framebuffer.OutputDescription, _window.Width, _window.Height);
                 WindowsNativeMethods.InitTransparency(_window.Handle);
+                WindowsNativeMethods.SetOverlayClickable(_window.Handle, false);
+
+                _ready = true;
+                
                 MainLoop(_cancellationTokenSource.Token);
             })
             {
                 IsBackground = true
             };
-
+            
             _renderThread.Start();
+
+            for (int i = 0; i < 10; i++)
+            { 
+               await Task.Delay(TimeSpan.FromMilliseconds(10));
+               
+               if (_ready)
+                   break;
+            }
         }
 
         private void MainLoop(CancellationToken cancellationToken)
@@ -83,9 +104,8 @@ namespace Aris.Moe.Overlay
 
                 _controller.Update(1f / 60f, snapshot); // Feed the input events to our ImGui controller, which passes them through to ImGui.
 
-                
                 Render();
-
+                
                 _cl.Begin();
                 _cl.SetFramebuffer(_gd.MainSwapchain.Framebuffer);
                 _cl.ClearColorTarget(0, new RgbaFloat(_clearColor.X, _clearColor.Y, _clearColor.Z, 0.0f));
@@ -97,6 +117,32 @@ namespace Aris.Moe.Overlay
 
             if (_window.Exists)
                 _window.Close();
+        }
+
+        protected void HideREALLY()
+        {
+            WindowsNativeMethods.SetWindowVisibility(_window.Handle, false); 
+        }
+        
+        protected void ShowREALLY()
+        {
+            //Apparently doesn't work due to setting the windows to transparent
+            //_window.WindowState = WindowState.Normal; 
+            
+            for (int i = 0; i < 10; i++)
+            {
+                if (_ready)
+                    break;
+
+                Task.Delay(TimeSpan.FromSeconds(1 / 10d)).Wait();
+            }
+            
+            WindowsNativeMethods.SetWindowVisibility(_window.Handle, true); 
+        }
+
+        protected IntPtr AddImageTexture(Bitmap bitmap)
+        {
+            return _controller.AddImageTexture(_gd, bitmap);
         }
 
         public async Task Stop()
@@ -116,16 +162,33 @@ namespace Aris.Moe.Overlay
         {
             ImGui.PushStyleColor(ImGuiCol.WindowBg, new Vector4(1.0f, 0.1f, 0.1f, 1.0f));
 
-            //ImGui.SetNextWindowFocus();
-            ImGui.SetNextWindowSize(new Vector2(200, 200));
-            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.1f);
-            ImGui.Begin("TextBox", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove);
+            ImGui.SetNextWindowSize(new Vector2(300, 300));
+            ImGui.SetNextWindowPos(new Vector2(300, 300));
+            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.8f);
+            ImGui.Begin("DebugTextBox2", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove);
             ImGui.PopStyleVar();
             ImGui.PopStyleColor();
 
             ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 1.0f);
-            ImGui.BeginChild("Text");
-            ImGui.Text("Ari Aris Aris");
+            ImGui.BeginChild("DebugText2");
+            ImGui.Text("DEBUG BACK DEBUG BACK DEBUG BACK DEBUG BACK DEBUG BACK DEBUG BACK DEBUG BACK DEBUG BACK DEBUG BACK DEBUG BACK DEBUG BACK DEBUG BACK DEBUG BACK");
+            ImGui.EndChild();
+            ImGui.PopStyleVar();
+
+            ImGui.End();
+            
+            ImGui.PushStyleColor(ImGuiCol.WindowBg, new Vector4(1.0f, 0.1f, 0.1f, 1.0f));
+
+            ImGui.SetNextWindowSize(new Vector2(200, 200));
+            ImGui.SetNextWindowPos(new Vector2(350, 250));
+            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.8f);
+            ImGui.Begin("DebugTextBox", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove);
+            ImGui.PopStyleVar();
+            ImGui.PopStyleColor();
+
+            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 1.0f);
+            ImGui.BeginChild("DebugText");
+            ImGui.TextWrapped("Debug  Japanese: こんにちは！テスト test ' ");
             ImGui.EndChild();
             ImGui.PopStyleVar();
 
@@ -134,6 +197,9 @@ namespace Aris.Moe.Overlay
 
         public void Dispose()
         {
+            if (_renderThread != null)
+                Stop().Wait();
+            
             _gd?.WaitForIdle();
             _controller?.Dispose();
             _cl?.Dispose();

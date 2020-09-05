@@ -18,6 +18,7 @@
     
     <ItemGroup>
       <PackageReference Include="ImGui.NET" Version="1.78.0" />
+      <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
       <PackageReference Include="Veldrid.ImGui" Version="5.72.0" />
       <PackageReference Include="Veldrid.StartupUtilities" Version="4.8.0" />
     </ItemGroup>

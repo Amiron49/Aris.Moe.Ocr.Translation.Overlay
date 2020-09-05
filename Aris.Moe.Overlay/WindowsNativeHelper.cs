@@ -63,16 +63,14 @@ namespace Aris.Moe.Overlay
         /// <summary>
         /// Allows showing/hiding the console window.
         /// </summary>
-        internal static void SetConsoleWindow(bool visiable)
+        internal static void SetWindowVisibility(IntPtr handle, bool visible)
         {
-            if (visiable)
+            if (visible)
             {
-                var handle = GetConsoleWindow();
                 ShowWindow(handle, SW_SHOW);
             }
             else
             {
-                var handle = GetConsoleWindow();
                 ShowWindow(handle, SW_HIDE);
             }
         }

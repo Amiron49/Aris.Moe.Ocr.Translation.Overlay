@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>8</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Aris.Moe.Ocr.Overlay.Translate.Core\Aris.Moe.Ocr.Overlay.Translate.Core.csproj" />
+      <ProjectReference Include="..\Aris.Moe.Overlay\Aris.Moe.Overlay.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Google.Cloud.Translate.V3" Version="2.0.0" />
+      <PackageReference Include="Google.Cloud.Vision.V1" Version="2.0.0" />
+      <PackageReference Include="Serilog" Version="2.9.0" />
+    </ItemGroup>
+
+</Project>
