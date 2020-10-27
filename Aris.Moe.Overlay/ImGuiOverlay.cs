@@ -18,17 +18,12 @@ namespace Aris.Moe.Overlay
         private ImGuiController _controller;
         private volatile CancellationTokenSource _cancellationTokenSource;
         private Thread _renderThread;
-        private volatile bool _ready = false;
+        protected volatile bool ThreadIsReady = false;
 
         private readonly Vector3 _clearColor = new Vector3(0f, 0f, 0f);
 
         protected volatile bool Visible = false;
 
-        public ImGuiOverlay()
-        {
-            Start().Wait();
-        }
-        
         public async Task Start()
         {
             _cancellationTokenSource = new CancellationTokenSource();
@@ -70,10 +65,11 @@ namespace Aris.Moe.Overlay
 
                 _cl = _gd.ResourceFactory.CreateCommandList();
                 _controller = new ImGuiController(_gd, _gd.MainSwapchain.Framebuffer.OutputDescription, _window.Width, _window.Height);
-                WindowsNativeMethods.InitTransparency(_window.Handle);
-                WindowsNativeMethods.SetOverlayClickable(_window.Handle, false);
 
-                _ready = true;
+                WindowsNativeMethods.InitTransparency(_window.Handle);
+                SetClickAbility(false);
+
+                ThreadIsReady = true;
                 
                 MainLoop(_cancellationTokenSource.Token);
             })
@@ -83,11 +79,11 @@ namespace Aris.Moe.Overlay
             
             _renderThread.Start();
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 100; i++)
             { 
                await Task.Delay(TimeSpan.FromMilliseconds(10));
-               
-               if (_ready)
+
+               if (ThreadIsReady)
                    break;
             }
         }
@@ -119,25 +115,9 @@ namespace Aris.Moe.Overlay
                 _window.Close();
         }
 
-        protected void HideREALLY()
+        protected void SetVisibility(bool visible)
         {
-            WindowsNativeMethods.SetWindowVisibility(_window.Handle, false); 
-        }
-        
-        protected void ShowREALLY()
-        {
-            //Apparently doesn't work due to setting the windows to transparent
-            //_window.WindowState = WindowState.Normal; 
-            
-            for (int i = 0; i < 10; i++)
-            {
-                if (_ready)
-                    break;
-
-                Task.Delay(TimeSpan.FromSeconds(1 / 10d)).Wait();
-            }
-            
-            WindowsNativeMethods.SetWindowVisibility(_window.Handle, true); 
+            WindowsNativeMethods.SetWindowVisibility(_window.Handle, visible); 
         }
 
         protected IntPtr AddImageTexture(Bitmap bitmap)
@@ -193,6 +173,16 @@ namespace Aris.Moe.Overlay
             ImGui.PopStyleVar();
 
             ImGui.End();
+        }
+
+        protected void BringToForeground()
+        {
+            WindowsNativeMethods.BringToForeground(_window.Handle);
+        }
+
+        protected void SetClickAbility(bool clickable)
+        {
+            WindowsNativeMethods.SetOverlayClickable(_window.Handle, clickable);
         }
 
         public void Dispose()

@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Aris.Moe.Overlay
 {
@@ -15,6 +16,7 @@ namespace Aris.Moe.Overlay
         private const int WS_EX_TRANSPARENT = 0x20;
 
         private const int SW_HIDE = 0x00;
+        private const int SW_RESTORE = 9;
         private const int SW_SHOW = 0x05;
 
         private static bool isClickable = true;
@@ -44,16 +46,16 @@ namespace Aris.Moe.Overlay
         /// NOTE: This function depends on InitTransparency being called when the SDL2Winhdow was created.
         /// </summary>
         /// <param name="handle">Veldrid window handle in IntPtr format.</param>
-        /// <param name="WantClickable">Set to true if you want to make the window clickable otherwise false.</param>
-        internal static void SetOverlayClickable(IntPtr handle, bool WantClickable)
+        /// <param name="wantClickable">Set to true if you want to make the window clickable otherwise false.</param>
+        internal static void SetOverlayClickable(IntPtr handle, bool wantClickable)
         {
-            if (!isClickable && WantClickable)
+            if (!isClickable && wantClickable)
             {
                 SetWindowLongPtr(handle, GWL_EXSTYLE, GWL_EXSTYLE_CLICKABLE);
-                SetFocus(handle);
+                BringToForeground(handle);
                 isClickable = true;
             }
-            else if(isClickable && !WantClickable)
+            else if(isClickable && !wantClickable)
             {
                 SetWindowLongPtr(handle, GWL_EXSTYLE, GWL_EXSTYLE_NOT_CLICKABLE);
                 isClickable = false;
@@ -73,6 +75,11 @@ namespace Aris.Moe.Overlay
             {
                 ShowWindow(handle, SW_HIDE);
             }
+        }
+        
+        internal static void BringToForeground(IntPtr handle)
+        {
+            SetForegroundWindow(handle);
         }
 
         /// <summary>
@@ -130,6 +137,9 @@ namespace Aris.Moe.Overlay
 
         [DllImport("user32.dll", EntryPoint = "ShowWindow", SetLastError = true)]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        
+        [DllImport("user32.dll", EntryPoint = "ShowWindow", SetLastError = true)]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [StructLayout(LayoutKind.Sequential)]
         private struct Margins

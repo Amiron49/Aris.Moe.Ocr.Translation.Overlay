@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Ocr.Overlay.Transl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Ocr.Overlay.Translate", "Aris.Moe.Ocr.Overlay.Translate\Aris.Moe.Ocr.Overlay.Translate.csproj", "{69DD68D4-B256-4545-809D-8DA6A60929B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Ocr.Overlay.Translate.Gui", "Aris.Moe.Ocr.Overlay.Translate.Gui\Aris.Moe.Ocr.Overlay.Translate.Gui.csproj", "{579EBF3B-DD63-44E5-A6B9-93FA16657DD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,5 +37,9 @@ Global
 		{69DD68D4-B256-4545-809D-8DA6A60929B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69DD68D4-B256-4545-809D-8DA6A60929B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69DD68D4-B256-4545-809D-8DA6A60929B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{579EBF3B-DD63-44E5-A6B9-93FA16657DD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{579EBF3B-DD63-44E5-A6B9-93FA16657DD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{579EBF3B-DD63-44E5-A6B9-93FA16657DD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{579EBF3B-DD63-44E5-A6B9-93FA16657DD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

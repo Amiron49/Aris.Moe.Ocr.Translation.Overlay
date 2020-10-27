@@ -73,6 +73,5 @@ namespace Aris.Moe.Ocr.Overlay.Translate
 
             return new SpatialText(annotation.Description, rectangle);
         }
-
     }
 }

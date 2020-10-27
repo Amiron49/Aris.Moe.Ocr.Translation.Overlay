@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>netcoreapp3.0</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Remove="**\*.qmlc" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Qml.Net" Version="0.11.0" />
+        <PackageReference Include="Qml.Net.WindowsBinaries" Version="0.11.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Aris.Moe.Ocr.Overlay.Translate.Core\Aris.Moe.Ocr.Overlay.Translate.Core.csproj" />
+        <ProjectReference Include="..\Aris.Moe.Ocr.Overlay.Translate\Aris.Moe.Ocr.Overlay.Translate.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Remove="Main.qml" />
+        <Content Include="Main.qml">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Include="Pages\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+</Project>

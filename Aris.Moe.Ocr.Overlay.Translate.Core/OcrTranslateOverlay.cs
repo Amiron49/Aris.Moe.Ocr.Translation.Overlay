@@ -9,18 +9,18 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
     public class OcrTranslateOverlay : IOcrTranslateOverlay
     {
         private readonly ITranslate _translate;
-        private readonly IOverlay _textOverlay;
+        private readonly IOverlay _internalOverlay;
         private readonly IScreenImageProvider _screenImageProvider;
         private readonly IOcr _ocr;
         private readonly IOcrTranslateOverlayConfiguration _ocrTranslateOverlayConfiguration;
         private readonly Action<string> _log;
 
 
-        public OcrTranslateOverlay(ITranslate translate, IOverlay textOverlay, IScreenImageProvider screenImageProvider, IOcr ocr,
+        public OcrTranslateOverlay(ITranslate translate, IOverlay internalOverlay, IScreenImageProvider screenImageProvider, IOcr ocr,
             IOcrTranslateOverlayConfiguration ocrTranslateOverlayConfiguration, Action<string> log)
         {
             _translate = translate;
-            _textOverlay = textOverlay;
+            _internalOverlay = internalOverlay;
             _screenImageProvider = screenImageProvider;
             _ocr = ocr;
             _ocrTranslateOverlayConfiguration = ocrTranslateOverlayConfiguration;
@@ -36,12 +36,12 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
 
             var captureLocation = _ocrTranslateOverlayConfiguration.ScreenArea;
             
-            _textOverlay.Add(new SpatialText("Will capture here", captureLocation));
+            _internalOverlay.Add(new SpatialText("Will capture here", captureLocation));
 
             await Task.Delay(TimeSpan.FromSeconds(1));
 
             HideOverlay();
-            _textOverlay.ClearAll();
+            _internalOverlay.ClearAll();
             
             await Task.Delay(TimeSpan.FromSeconds(0.2));
 
@@ -49,15 +49,12 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
             
             ShowOverlay();
             
-            //TODO display captured image
-            //_textOverlay.Add(screenImage.Original, new Rectangle(0, 0, screenImage.Original.Width/1, screenImage.Original.Height/1));
-
             var recognizedTextboxes = (await _ocr.Ocr(screenImage.Stream, _ocrTranslateOverlayConfiguration.SourceLanguage)).ToList();
 
             var textBoxesCount = recognizedTextboxes.Count();
             
             foreach (var spatialText in recognizedTextboxes)
-                _textOverlay.Add(spatialText);
+                _internalOverlay.Add(spatialText);
             
             if (textBoxesCount >= 60)
             {
@@ -69,10 +66,10 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
 
             var asSpatialText = translations.Select(x => new SpatialText(x.Text, x.Area));
 
-            _textOverlay.ClearAll();
+            _internalOverlay.ClearAll();
             
             foreach (var spatialText in asSpatialText)
-                _textOverlay.Add(spatialText);
+                _internalOverlay.Add(spatialText);
 
             ShowOverlay();
         }
@@ -82,24 +79,24 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
             var recognizedTextboxes = await OcrScreenInternal();
 
             foreach (var spatialText in recognizedTextboxes)
-                _textOverlay.Add(spatialText);
+                _internalOverlay.Add(spatialText);
 
             ShowOverlay();
         }
-        
+
         private async Task<IList<ISpatialText>> OcrScreenInternal()
         {
             ShowOverlay();
 
             var captureLocation = _ocrTranslateOverlayConfiguration.ScreenArea;
             
-            _textOverlay.Add(new SpatialText("Will capture here", captureLocation));
+            _internalOverlay.Add(new SpatialText("Will capture here", captureLocation));
 
             await Task.Delay(TimeSpan.FromSeconds(1));
             
             HideOverlay();
             
-            _textOverlay.ClearAll();
+            _internalOverlay.ClearAll();
 
             await Task.Delay(TimeSpan.FromSeconds(0.2));
 
@@ -112,22 +109,33 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
 
         public void HideOverlay()
         {
-            _textOverlay.HideOverlay();
+            _internalOverlay.HideOverlay();
         }
 
         public void ToggleOverlay()
         {
-            _textOverlay.ToggleOverlay();
+            _internalOverlay.ToggleOverlay();
         }
 
         public void ShowOverlay()
         {
-            _textOverlay.ShowOverlay();
+            _internalOverlay.ShowOverlay();
+        }
+
+        public void AskForTargetResize()
+        {
+            _internalOverlay.AskForResize(_ocrTranslateOverlayConfiguration.ScreenArea, rectangle =>
+            {
+                if (rectangle == null)
+                    return;
+
+                _ocrTranslateOverlayConfiguration.ScreenArea = rectangle.Value;
+            });
         }
 
         public void Dispose()
         {
-            _textOverlay?.Dispose();
+            _internalOverlay?.Dispose();
         }
     }
 }

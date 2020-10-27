@@ -11,5 +11,6 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
         void ToggleOverlay();
         void ShowOverlay();
         Task OcrScreen();
+        void AskForTargetResize();
     }
 }
