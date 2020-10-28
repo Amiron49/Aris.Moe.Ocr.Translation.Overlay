@@ -12,6 +12,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate
 {
     public class GoogleTranslate : ITranslate
     {
+        private readonly IGoogleConfiguration _googleConfiguration;
         private readonly Action<string> _log;
         private readonly TranslationServiceClient _translateClient;
 
@@ -20,11 +21,12 @@ namespace Aris.Moe.Ocr.Overlay.Translate
             if (string.IsNullOrEmpty(googleConfiguration.KeyPath))
                 throw new ArgumentNullException(nameof(googleConfiguration.KeyPath));
 
+            _googleConfiguration = googleConfiguration;
             _log = log;
 
             _translateClient = new TranslationServiceClientBuilder
             {
-                CredentialsPath = googleConfiguration.KeyPath,
+                CredentialsPath = googleConfiguration.KeyPath
             }.Build();
         }
 
@@ -32,10 +34,10 @@ namespace Aris.Moe.Ocr.Overlay.Translate
         {
             return TranslateInternal(spatialTexts.ToList(), targetLanguage, inputLanguage);
         }
-        
+
         private async Task<IEnumerable<Translation>> TranslateInternal(IList<ISpatialText> spatialTexts, string? targetLanguage = "en", string? inputLanguage = null)
         {
-            var googleTranslations = await TranslateWithGoogle(spatialTexts);
+            var googleTranslations = await TranslateWithGoogle(spatialTexts, targetLanguage, inputLanguage);
 
             if (googleTranslations.Count != spatialTexts.Count())
             {
@@ -53,7 +55,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate
             return asTranslations;
         }
 
-        private async Task<RepeatedField<Google.Cloud.Translate.V3.Translation>> TranslateWithGoogle(IEnumerable<ISpatialText> spatialTexts)
+        private async Task<RepeatedField<Google.Cloud.Translate.V3.Translation>> TranslateWithGoogle(IEnumerable<ISpatialText> spatialTexts, string? targetLanguage, string? inputLanguage)
         {
             var untranslatedTexts = spatialTexts.Select(x => x.Text).ToList();
 
@@ -69,10 +71,10 @@ namespace Aris.Moe.Ocr.Overlay.Translate
                 {
                     untranslatedTexts
                 },
-                TargetLanguageCode = "en",
-                SourceLanguageCode = "ja",
+                TargetLanguageCode = targetLanguage,
+                SourceLanguageCode = inputLanguage,
                 MimeType = "text/plain",
-                ParentAsLocationName = new LocationName("privatetools-1220", "global"),
+                ParentAsLocationName = new LocationName(_googleConfiguration.ProjectId, _googleConfiguration.LocationId)
             };
 
             var response = await _translateClient.TranslateTextAsync(request);

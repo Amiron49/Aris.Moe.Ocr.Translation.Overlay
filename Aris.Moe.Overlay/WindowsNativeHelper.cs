@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Threading;
+// ReSharper disable InconsistentNaming
 
 namespace Aris.Moe.Overlay
 {
@@ -16,14 +16,11 @@ namespace Aris.Moe.Overlay
         private const int WS_EX_TRANSPARENT = 0x20;
 
         private const int SW_HIDE = 0x00;
-        private const int SW_RESTORE = 9;
         private const int SW_SHOW = 0x05;
 
         private static bool isClickable = true;
         private static IntPtr GWL_EXSTYLE_CLICKABLE = IntPtr.Zero;
         private static IntPtr GWL_EXSTYLE_NOT_CLICKABLE = IntPtr.Zero;
-
-        private const int KEY_PRESSED = 0x8000;
 
         /// <summary>
         /// Allows the SDL2Window to become transparent.
@@ -37,7 +34,7 @@ namespace Aris.Moe.Overlay
             GWL_EXSTYLE_NOT_CLICKABLE = new IntPtr(
                 GWL_EXSTYLE_CLICKABLE.ToInt64() | WS_EX_LAYERED | WS_EX_TRANSPARENT);
 
-            Margins margins = Margins.FromRectangle(new Rectangle(-1, -1, -1, -1));
+            var margins = Margins.FromRectangle(new Rectangle(-1, -1, -1, -1));
             DwmExtendFrameIntoClientArea(handle, ref margins);
         }
 
@@ -55,7 +52,7 @@ namespace Aris.Moe.Overlay
                 BringToForeground(handle);
                 isClickable = true;
             }
-            else if(isClickable && !wantClickable)
+            else if (isClickable && !wantClickable)
             {
                 SetWindowLongPtr(handle, GWL_EXSTYLE, GWL_EXSTYLE_NOT_CLICKABLE);
                 isClickable = false;
@@ -68,15 +65,11 @@ namespace Aris.Moe.Overlay
         internal static void SetWindowVisibility(IntPtr handle, bool visible)
         {
             if (visible)
-            {
                 ShowWindow(handle, SW_SHOW);
-            }
             else
-            {
                 ShowWindow(handle, SW_HIDE);
-            }
         }
-        
+
         internal static void BringToForeground(IntPtr handle)
         {
             SetForegroundWindow(handle);
@@ -99,29 +92,12 @@ namespace Aris.Moe.Overlay
             return Vector2.Zero;
         }
 
-        /// <summary>
-        /// Returns true if the key is pressed.
-        /// For keycode information visit: https://www.pinvoke.net/default.aspx/user32.getkeystate
-        /// </summary>
-        /// <param name="nVirtKey">key to look for.</param>
-        /// <returns>weather the key is pressed or not.</returns>
-        public static bool IsKeyPressed(int nVirtKey)
-        {
-            return Convert.ToBoolean(GetKeyState(nVirtKey) & KEY_PRESSED);
-        }
-
-        [DllImport("USER32.dll")]
-        private static extern short GetKeyState(int nVirtKey);
-
         [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetCursorPos(out POINT lpPoint);
 
         [DllImport("user32.dll")]
         private static extern bool ScreenToClient(IntPtr hWnd, ref POINT lpPoint);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr SetFocus(IntPtr hWnd);
 
         [DllImport("dwmapi.dll")]
         private static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref Margins pMarInset);
@@ -132,12 +108,9 @@ namespace Aris.Moe.Overlay
         [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
         private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
-        [DllImport("kernel32.dll")]
-        private static extern IntPtr GetConsoleWindow();
-
         [DllImport("user32.dll", EntryPoint = "ShowWindow", SetLastError = true)]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-        
+
         [DllImport("user32.dll", EntryPoint = "ShowWindow", SetLastError = true)]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
@@ -156,7 +129,7 @@ namespace Aris.Moe.Overlay
                     left = rectangle.Left,
                     right = rectangle.Right,
                     top = rectangle.Top,
-                    bottom = rectangle.Bottom,
+                    bottom = rectangle.Bottom
                 };
                 return margins;
             }
@@ -170,8 +143,8 @@ namespace Aris.Moe.Overlay
 
             public POINT(int x, int y)
             {
-                this.X = x;
-                this.Y = y;
+                X = x;
+                Y = y;
             }
 
             public static implicit operator Point(POINT p)

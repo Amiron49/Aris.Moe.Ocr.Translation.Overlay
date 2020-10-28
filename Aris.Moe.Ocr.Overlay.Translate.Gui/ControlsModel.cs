@@ -6,7 +6,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
     public class ControlsModel : IOcrTranslateOverlay
     {
         private readonly IOcrTranslateOverlay _translateOverlay;
-        
+
         public ControlsModel()
         {
             _translateOverlay = Program.Services.GetInstance<IOcrTranslateOverlay>();

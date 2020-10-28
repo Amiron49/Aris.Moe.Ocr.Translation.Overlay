@@ -2,18 +2,20 @@
 using Aris.Moe.Ocr.Overlay.Translate.Core;
 using Aris.Moe.Ocr.Overlay.Translate.DependencyInjection;
 using Lamar;
+using Serilog;
 
-namespace Aris.Moe.Ocr.Overlay.Translate.Cli
+namespace Aris.Moe.Ocr.Overlay.Translate.Gui
 {
-    public class OverlayTranslateCliRegistry : ServiceRegistry
+    public class OverlayTranslateGuiRegistry : ServiceRegistry
     {
-        public OverlayTranslateCliRegistry(Config configuration)
+        public OverlayTranslateGuiRegistry(Config configuration, ILogger logger)
         {
             IncludeRegistry<OverlayTranslateRegistry>();
             For<Action<string>>().Use(Console.WriteLine);
 
+            For<ILogger>().Use(logger);
             For<IOcrTranslateOverlayConfiguration>().Use(configuration);
-            For<IGoogleConfiguration>().Use(configuration);
+            For<IGoogleConfiguration>().Use(configuration).Singleton();
         }
     }
 }

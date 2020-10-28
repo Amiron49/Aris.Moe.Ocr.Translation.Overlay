@@ -6,9 +6,9 @@ using ImGuiNET;
 using Newtonsoft.Json;
 using Serilog;
 
-namespace Aris.Moe.Ocr.Overlay.Translate.OverlayModes
+namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
 {
-    public class TargetAreaResizeOverlay: ITargetAreaResizeOverlay, IGuiMode
+    public class TargetAreaResizeOverlay : ITargetAreaResizeOverlay, IGuiMode
     {
         private const ImGuiWindowFlags NoDecoration = ImGuiWindowFlags.NoDecoration |
                                                       ImGuiWindowFlags.NoMove |
@@ -44,7 +44,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.OverlayModes
             {
                 if (OperationOver)
                     return;
-                
+
                 OperationOver = true;
 
                 var asRectangle = CalcRectangle();
@@ -70,36 +70,36 @@ namespace Aris.Moe.Ocr.Overlay.Translate.OverlayModes
         public void AskForResize(Rectangle current, Action<Rectangle?> resultCallback)
         {
             var io = ImGui.GetIO();
-            
+
             io.WantCaptureMouse = true;
             io.WantCaptureKeyboard = true;
 
             _currentResizeOperation = new ResizeOperation(current, rectangle =>
             {
-                
                 io.WantCaptureMouse = false;
                 io.WantCaptureKeyboard = false;
-                
+
                 resultCallback(rectangle);
             });
         }
-        private ResizeOperation? _currentResizeOperation = null;
-        
+
+        private ResizeOperation? _currentResizeOperation;
+
         public void Render()
         {
             if (_currentResizeOperation == null || _currentResizeOperation.OperationOver)
                 return;
-            
+
             RenderBackdrop(() =>
             {
                 ImGui.PushStyleColor(ImGuiCol.WindowBg, new Vector4(0.2f, 0.4f, 1.0f, 1.0f));
                 ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.8f);
-                
+
                 if (!_currentResizeOperation.CurrentlyDragging)
                     RenderCurrentCaptureArea();
                 else
                     RenderSelectionLive();
-               
+
                 ImGui.End();
                 ImGui.PopStyleColor();
                 ImGui.PopStyleVar(0);
@@ -107,7 +107,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.OverlayModes
 
             if (ImGui.IsKeyPressed(ImGui.GetKeyIndex(ImGuiKey.Escape)))
                 _currentResizeOperation.Finish();
-            
+
             HandleDragging();
         }
 
@@ -115,9 +115,9 @@ namespace Aris.Moe.Ocr.Overlay.Translate.OverlayModes
         {
             if (_currentResizeOperation == null || _currentResizeOperation.OperationOver)
                 return;
-            
+
             _logger.Debug(JsonConvert.SerializeObject(_currentResizeOperation));
-            
+
             if (!_currentResizeOperation.CurrentlyDragging)
             {
                 var isMouseDown = ImGui.IsMouseDown(ImGuiMouseButton.Left);
@@ -133,7 +133,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.OverlayModes
                 _currentResizeOperation.CurrentMousePosition = new Point((int) mousePos.X, (int) mousePos.Y);
 
                 var isMouseReleased = ImGui.IsMouseReleased(ImGuiMouseButton.Left);
-                
+
                 if (isMouseReleased)
                     _currentResizeOperation.DragEnd = _currentResizeOperation.CurrentMousePosition;
             }
@@ -147,14 +147,14 @@ namespace Aris.Moe.Ocr.Overlay.Translate.OverlayModes
             if (_currentResizeOperation?.CurrentMousePosition == null || _currentResizeOperation.DragStart == null)
                 return;
 
-            
+
             var currentMousePosition = _currentResizeOperation.CurrentMousePosition.Value;
 
             var selectionRectangle = currentMousePosition.ToRectangleWithUnknownPointOrder(_currentResizeOperation.DragStart.Value);
 
             if (selectionRectangle == null)
                 return;
-            
+
             ImGui.SetNextWindowSize(new Vector2(selectionRectangle.Value.Width, selectionRectangle.Value.Height));
             ImGui.SetNextWindowPos(new Vector2(selectionRectangle.Value.X, selectionRectangle.Value.Y));
 
@@ -189,38 +189,8 @@ namespace Aris.Moe.Ocr.Overlay.Translate.OverlayModes
             ImGui.PopStyleVar();
 
             inner();
-            
+
             ImGui.End();
-        }
-    }
-
-    internal static class PointExtensions
-    {
-        public static Rectangle? ToRectangleWithUnknownPointOrder(this Point a, Point b)
-        {
-            var pointsAreOnTheSameLine = a.X == b.X || a.Y == b.Y;
-            
-            if (pointsAreOnTheSameLine)
-                return null;
-            
-            var aHasLowestX = a.X < b.X;
-            var aHasLowestY = a.Y < b.Y;
-            
-            var lowestX = aHasLowestX ? a.X : b.X;
-            var lowestY = aHasLowestY ? a.Y : b.Y;
-            
-            var highestX = aHasLowestX ? b.X : a.X;
-            var highestY = aHasLowestY ? b.Y : a.Y;
-
-            var topLeft = new Point(lowestX, lowestY);
-            var bottomRight = new Point(highestX, highestY);
-
-            return topLeft.ToRectangle(bottomRight);
-        }
-        
-        private static Rectangle ToRectangle(this Point topLeft, Point bottomRight)
-        {
-            return new Rectangle(topLeft, new Size(bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y));
         }
     }
 }

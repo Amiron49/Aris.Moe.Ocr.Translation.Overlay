@@ -5,58 +5,52 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
 using Veldrid;
-using PixelFormat = Veldrid.PixelFormat;
 
 namespace Aris.Moe.Overlay
 {
     /// <summary>
-    /// A modified version of Veldrid.ImGui's ImGuiRenderer.
-    /// Manages input for ImGui and handles rendering ImGui's DrawLists with Veldrid.
+    ///     A modified version of Veldrid.ImGui's ImGuiRenderer.
+    ///     Manages input for ImGui and handles rendering ImGui's DrawLists with Veldrid.
     /// </summary>
     public class ImGuiController : IDisposable
     {
-        private GraphicsDevice _gd;
-        private bool _frameBegun;
-
-        // Veldrid objects
-        private DeviceBuffer _vertexBuffer;
-        private DeviceBuffer _indexBuffer;
-        private DeviceBuffer _projMatrixBuffer;
-        private Texture _fontTexture;
-        private List<Texture> _imageTextures = new List<Texture>();
-        private TextureView _fontTextureView;
-        private List<TextureView> _imageTextureViews = new List<TextureView>();
-        private Shader _vertexShader;
-        private Shader _fragmentShader;
-        private ResourceLayout _layout;
-        private ResourceLayout _textureLayout;
-        private Pipeline _pipeline;
-        private ResourceSet _mainResourceSet;
-        private ResourceSet _fontTextureResourceSet;
-
-        private IntPtr _fontAtlasID = (IntPtr) 1;
-        private bool _controlDown;
-        private bool _shiftDown;
-        private bool _altDown;
-        private bool _winKeyDown;
-
-        private int _windowWidth;
-        private int _windowHeight;
-        private Vector2 _scaleFactor = Vector2.One;
+        private readonly List<IDisposable> _ownedResources = new List<IDisposable>();
 
         // Image trackers
         private readonly Dictionary<TextureView, ResourceSetInfo> _setsByView
             = new Dictionary<TextureView, ResourceSetInfo>();
 
-        private readonly Dictionary<Texture, TextureView> _autoViewsByTexture
-            = new Dictionary<Texture, TextureView>();
-
         private readonly Dictionary<IntPtr, ResourceSetInfo> _viewsById = new Dictionary<IntPtr, ResourceSetInfo>();
-        private readonly List<IDisposable> _ownedResources = new List<IDisposable>();
-        private int _lastAssignedID = 100;
+        private bool _altDown;
+        private bool _controlDown;
+
+        private readonly IntPtr _fontAtlasId = (IntPtr) 1;
+        private Texture _fontTexture;
+        private ResourceSet _fontTextureResourceSet;
+        private TextureView _fontTextureView;
+        private Shader _fragmentShader;
+        private bool _frameBegun;
+        private GraphicsDevice _gd;
+        private DeviceBuffer _indexBuffer;
+        private int _lastAssignedId = 100;
+        private ResourceLayout _layout;
+        private ResourceSet _mainResourceSet;
+        private Pipeline _pipeline;
+        private DeviceBuffer _projMatrixBuffer;
+        private readonly Vector2 _scaleFactor = Vector2.One;
+        private bool _shiftDown;
+        private ResourceLayout _textureLayout;
+
+        // Veldrid objects
+        private DeviceBuffer _vertexBuffer;
+        private Shader _vertexShader;
+        private int _windowHeight;
+
+        private int _windowWidth;
+        private bool _winKeyDown;
 
         /// <summary>
-        /// Constructs a new ImGuiController.
+        ///     Constructs a new ImGuiController.
         /// </summary>
         public ImGuiController(GraphicsDevice gd, OutputDescription outputDescription, int width, int height)
         {
@@ -68,7 +62,7 @@ namespace Aris.Moe.Overlay
             ImGui.SetCurrentContext(context);
 
             //TODO config
-            var sizePixels = 32f;
+            const float sizePixels = 32f;
             ImGui.GetIO().Fonts.AddFontFromFileTTF(GetTextFilePath(), sizePixels, null, ImGui.GetIO().Fonts.GetGlyphRangesJapanese());
 
             CreateDeviceResources(gd, outputDescription);
@@ -80,10 +74,29 @@ namespace Aris.Moe.Overlay
             _frameBegun = true;
         }
 
+        /// <summary>
+        ///     Frees all graphics resources used by the renderer.
+        /// </summary>
+        public void Dispose()
+        {
+            _vertexBuffer.Dispose();
+            _indexBuffer.Dispose();
+            _projMatrixBuffer.Dispose();
+            _fontTexture.Dispose();
+            _fontTextureView.Dispose();
+            _vertexShader.Dispose();
+            _fragmentShader.Dispose();
+            _layout.Dispose();
+            _textureLayout.Dispose();
+            _pipeline.Dispose();
+            _mainResourceSet.Dispose();
+
+            foreach (var resource in _ownedResources) resource.Dispose();
+        }
+
         private string GetTextFilePath()
         {
-            var s = Path.DirectorySeparatorChar;
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $@"Fonts", "NotoSansJP-Medium.otf");
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Fonts", "NotoSansJP-Medium.otf");
 
             return path;
         }
@@ -107,12 +120,12 @@ namespace Aris.Moe.Overlay
             _projMatrixBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             _projMatrixBuffer.Name = "ImGui.NET Projection Buffer";
 
-            var vertexShaderBytes = LoadEmbeddedShaderCode(gd.ResourceFactory, "imgui-vertex", ShaderStages.Vertex);
-            var fragmentShaderBytes = LoadEmbeddedShaderCode(gd.ResourceFactory, "imgui-frag", ShaderStages.Fragment);
+            var vertexShaderBytes = LoadEmbeddedShaderCode(gd.ResourceFactory, "imgui-vertex");
+            var fragmentShaderBytes = LoadEmbeddedShaderCode(gd.ResourceFactory, "imgui-frag");
             _vertexShader = factory.CreateShader(new ShaderDescription(ShaderStages.Vertex, vertexShaderBytes, "VS"));
             _fragmentShader = factory.CreateShader(new ShaderDescription(ShaderStages.Fragment, fragmentShaderBytes, "FS"));
 
-            var vertexLayouts = new VertexLayoutDescription[]
+            var vertexLayouts = new[]
             {
                 new VertexLayoutDescription(
                     new VertexElementDescription("in_position", VertexElementSemantic.Position, VertexElementFormat.Float2),
@@ -132,7 +145,7 @@ namespace Aris.Moe.Overlay
                 new RasterizerStateDescription(FaceCullMode.None, PolygonFillMode.Solid, FrontFace.Clockwise, false, true),
                 PrimitiveTopology.TriangleList,
                 new ShaderSetDescription(vertexLayouts, new[] {_vertexShader, _fragmentShader}),
-                new ResourceLayout[] {_layout, _textureLayout},
+                new[] {_layout, _textureLayout},
                 outputDescription);
             _pipeline = factory.CreateGraphicsPipeline(ref pd);
 
@@ -144,44 +157,41 @@ namespace Aris.Moe.Overlay
         }
 
         /// <summary>
-        /// Gets or creates a handle for a texture to be drawn with ImGui.
-        /// Pass the returned handle to Image() or ImageButton().
+        ///     Gets or creates a handle for a texture to be drawn with ImGui.
+        ///     Pass the returned handle to Image() or ImageButton().
         /// </summary>
         public IntPtr GetOrCreateImGuiBinding(ResourceFactory factory, TextureView textureView)
         {
-            if (!_setsByView.TryGetValue(textureView, out var rsi))
-            {
-                var resourceSet = factory.CreateResourceSet(new ResourceSetDescription(_textureLayout, textureView));
-                rsi = new ResourceSetInfo(GetNextImGuiBindingID(), resourceSet);
+            if (_setsByView.TryGetValue(textureView, out var rsi)) 
+                return rsi.ImGuiBinding;
+            
+            var resourceSet = factory.CreateResourceSet(new ResourceSetDescription(_textureLayout, textureView));
+            rsi = new ResourceSetInfo(GetNextImGuiBindingId(), resourceSet);
 
-                _setsByView.Add(textureView, rsi);
-                _viewsById.Add(rsi.ImGuiBinding, rsi);
-                _ownedResources.Add(resourceSet);
-            }
+            _setsByView.Add(textureView, rsi);
+            _viewsById.Add(rsi.ImGuiBinding, rsi);
+            _ownedResources.Add(resourceSet);
 
             return rsi.ImGuiBinding;
         }
 
-        private IntPtr GetNextImGuiBindingID()
+        private IntPtr GetNextImGuiBindingId()
         {
-            var newID = _lastAssignedID++;
-            return (IntPtr) newID;
+            var newId = _lastAssignedId++;
+            return (IntPtr) newId;
         }
 
         /// <summary>
-        /// Retrieves the shader texture binding for the given helper handle.
+        ///     Retrieves the shader texture binding for the given helper handle.
         /// </summary>
         public ResourceSet GetImageResourceSet(IntPtr imGuiBinding)
         {
-            if (!_viewsById.TryGetValue(imGuiBinding, out var tvi))
-            {
-                throw new InvalidOperationException("No registered ImGui binding with id " + imGuiBinding.ToString());
-            }
+            if (!_viewsById.TryGetValue(imGuiBinding, out var tvi)) throw new InvalidOperationException("No registered ImGui binding with id " + imGuiBinding);
 
             return tvi.ResourceSet;
         }
 
-        private byte[] LoadEmbeddedShaderCode(ResourceFactory factory, string name, ShaderStages stage)
+        private static byte[] LoadEmbeddedShaderCode(ResourceFactory factory, string name)
         {
             switch (factory.BackendType)
             {
@@ -210,11 +220,16 @@ namespace Aris.Moe.Overlay
             }
         }
 
-        private byte[] GetEmbeddedResourceBytes(string resourceName)
+        private static byte[] GetEmbeddedResourceBytes(string resourceName)
         {
             var assembly = typeof(ImGuiController).Assembly;
             using (var s = assembly.GetManifestResourceStream(resourceName))
             {
+                if (s == null)
+                {
+                    throw new Exception($"Could not load resource '{resourceName}'");
+                }
+                
                 var ret = new byte[s.Length];
                 s.Read(ret, 0, (int) s.Length);
                 return ret;
@@ -222,18 +237,16 @@ namespace Aris.Moe.Overlay
         }
 
         /// <summary>
-        /// Recreates the device texture used to render text.
+        ///     Recreates the device texture used to render text.
         /// </summary>
         public void RecreateFontDeviceTexture(GraphicsDevice gd)
         {
             var io = ImGui.GetIO();
             // Build
-            IntPtr pixels;
-            int width, height, bytesPerPixel;
 
-            io.Fonts.GetTexDataAsRGBA32(out pixels, out width, out height, out bytesPerPixel);
+            io.Fonts.GetTexDataAsRGBA32(out IntPtr pixels, out var width, out var height, out var bytesPerPixel);
             // Store our identifier
-            io.Fonts.SetTexID(_fontAtlasID);
+            io.Fonts.SetTexID(_fontAtlasId);
 
             _fontTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
                 (uint) width,
@@ -261,10 +274,10 @@ namespace Aris.Moe.Overlay
         }
 
         /// <summary>
-        /// Renders the ImGui draw list data.
-        /// This method requires a <see cref="GraphicsDevice"/> because it may create new DeviceBuffers if the size of vertex
-        /// or index data has increased beyond the capacity of the existing buffers.
-        /// A <see cref="CommandList"/> is needed to submit drawing and resource update commands.
+        ///     Renders the ImGui draw list data.
+        ///     This method requires a <see cref="GraphicsDevice" /> because it may create new DeviceBuffers if the size of vertex
+        ///     or index data has increased beyond the capacity of the existing buffers.
+        ///     A <see cref="CommandList" /> is needed to submit drawing and resource update commands.
         /// </summary>
         public void Render(GraphicsDevice gd, CommandList cl)
         {
@@ -277,14 +290,11 @@ namespace Aris.Moe.Overlay
         }
 
         /// <summary>
-        /// Updates ImGui input and IO configuration state.
+        ///     Updates ImGui input and IO configuration state.
         /// </summary>
         public void Update(float deltaSeconds, InputSnapshot snapshot)
         {
-            if (_frameBegun)
-            {
-                ImGui.Render();
-            }
+            if (_frameBegun) ImGui.Render();
 
             SetPerFrameImGuiData(deltaSeconds);
             UpdateImGuiInput(snapshot);
@@ -294,8 +304,8 @@ namespace Aris.Moe.Overlay
         }
 
         /// <summary>
-        /// Sets per-frame data based on the associated window.
-        /// This is called by Update(float).
+        ///     Sets per-frame data based on the associated window.
+        ///     This is called by Update(float).
         /// </summary>
         private void SetPerFrameImGuiData(float deltaSeconds)
         {
@@ -318,9 +328,7 @@ namespace Aris.Moe.Overlay
             var middlePressed = false;
             var rightPressed = false;
             foreach (var me in snapshot.MouseEvents)
-            {
                 if (me.Down)
-                {
                     switch (me.MouseButton)
                     {
                         case MouseButton.Left:
@@ -333,8 +341,6 @@ namespace Aris.Moe.Overlay
                             rightPressed = true;
                             break;
                     }
-                }
-            }
 
             io.MouseDown[0] = leftPressed || snapshot.IsMouseDown(MouseButton.Left);
             io.MouseDown[1] = rightPressed || snapshot.IsMouseDown(MouseButton.Right);
@@ -354,25 +360,13 @@ namespace Aris.Moe.Overlay
             {
                 var keyEvent = keyEvents[i];
                 io.KeysDown[(int) keyEvent.Key] = keyEvent.Down;
-                if (keyEvent.Key == Key.ControlLeft)
-                {
-                    _controlDown = keyEvent.Down;
-                }
+                if (keyEvent.Key == Key.ControlLeft) _controlDown = keyEvent.Down;
 
-                if (keyEvent.Key == Key.ShiftLeft)
-                {
-                    _shiftDown = keyEvent.Down;
-                }
+                if (keyEvent.Key == Key.ShiftLeft) _shiftDown = keyEvent.Down;
 
-                if (keyEvent.Key == Key.AltLeft)
-                {
-                    _altDown = keyEvent.Down;
-                }
+                if (keyEvent.Key == Key.AltLeft) _altDown = keyEvent.Down;
 
-                if (keyEvent.Key == Key.WinLeft)
-                {
-                    _winKeyDown = keyEvent.Down;
-                }
+                if (keyEvent.Key == Key.WinLeft) _winKeyDown = keyEvent.Down;
             }
 
             io.KeyCtrl = _controlDown;
@@ -405,48 +399,45 @@ namespace Aris.Moe.Overlay
             io.KeyMap[(int) ImGuiKey.Z] = (int) Key.Z;
         }
 
-        private void RenderImDrawData(ImDrawDataPtr draw_data, GraphicsDevice gd, CommandList cl)
+        private void RenderImDrawData(ImDrawDataPtr drawData, GraphicsDevice gd, CommandList cl)
         {
             uint vertexOffsetInVertices = 0;
             uint indexOffsetInElements = 0;
 
-            if (draw_data.CmdListsCount == 0)
-            {
-                return;
-            }
+            if (drawData.CmdListsCount == 0) return;
 
-            var totalVBSize = (uint) (draw_data.TotalVtxCount * Unsafe.SizeOf<ImDrawVert>());
-            if (totalVBSize > _vertexBuffer.SizeInBytes)
+            var totalVbSize = (uint) (drawData.TotalVtxCount * Unsafe.SizeOf<ImDrawVert>());
+            if (totalVbSize > _vertexBuffer.SizeInBytes)
             {
                 gd.DisposeWhenIdle(_vertexBuffer);
-                _vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint) (totalVBSize * 1.5f), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
+                _vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint) (totalVbSize * 1.5f), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
             }
 
-            var totalIBSize = (uint) (draw_data.TotalIdxCount * sizeof(ushort));
-            if (totalIBSize > _indexBuffer.SizeInBytes)
+            var totalIbSize = (uint) (drawData.TotalIdxCount * sizeof(ushort));
+            if (totalIbSize > _indexBuffer.SizeInBytes)
             {
                 gd.DisposeWhenIdle(_indexBuffer);
-                _indexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint) (totalIBSize * 1.5f), BufferUsage.IndexBuffer | BufferUsage.Dynamic));
+                _indexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint) (totalIbSize * 1.5f), BufferUsage.IndexBuffer | BufferUsage.Dynamic));
             }
 
-            for (var i = 0; i < draw_data.CmdListsCount; i++)
+            for (var i = 0; i < drawData.CmdListsCount; i++)
             {
-                var cmd_list = draw_data.CmdListsRange[i];
+                var cmdList = drawData.CmdListsRange[i];
 
                 cl.UpdateBuffer(
                     _vertexBuffer,
                     vertexOffsetInVertices * (uint) Unsafe.SizeOf<ImDrawVert>(),
-                    cmd_list.VtxBuffer.Data,
-                    (uint) (cmd_list.VtxBuffer.Size * Unsafe.SizeOf<ImDrawVert>()));
+                    cmdList.VtxBuffer.Data,
+                    (uint) (cmdList.VtxBuffer.Size * Unsafe.SizeOf<ImDrawVert>()));
 
                 cl.UpdateBuffer(
                     _indexBuffer,
                     indexOffsetInElements * sizeof(ushort),
-                    cmd_list.IdxBuffer.Data,
-                    (uint) (cmd_list.IdxBuffer.Size * sizeof(ushort)));
+                    cmdList.IdxBuffer.Data,
+                    (uint) (cmdList.IdxBuffer.Size * sizeof(ushort)));
 
-                vertexOffsetInVertices += (uint) cmd_list.VtxBuffer.Size;
-                indexOffsetInElements += (uint) cmd_list.IdxBuffer.Size;
+                vertexOffsetInVertices += (uint) cmdList.VtxBuffer.Size;
+                indexOffsetInElements += (uint) cmdList.IdxBuffer.Size;
             }
 
             // Setup orthographic projection matrix into our constant buffer
@@ -466,78 +457,47 @@ namespace Aris.Moe.Overlay
             cl.SetPipeline(_pipeline);
             cl.SetGraphicsResourceSet(0, _mainResourceSet);
 
-            draw_data.ScaleClipRects(io.DisplayFramebufferScale);
+            drawData.ScaleClipRects(io.DisplayFramebufferScale);
 
             // Render command lists
-            var vtx_offset = 0;
-            var idx_offset = 0;
-            for (var n = 0; n < draw_data.CmdListsCount; n++)
+            var vtxOffset = 0;
+            var idxOffset = 0;
+            for (var n = 0; n < drawData.CmdListsCount; n++)
             {
-                var cmd_list = draw_data.CmdListsRange[n];
-                for (var cmd_i = 0; cmd_i < cmd_list.CmdBuffer.Size; cmd_i++)
+                var cmdList = drawData.CmdListsRange[n];
+                for (var cmdI = 0; cmdI < cmdList.CmdBuffer.Size; cmdI++)
                 {
-                    var pcmd = cmd_list.CmdBuffer[cmd_i];
+                    var pcmd = cmdList.CmdBuffer[cmdI];
                     if (pcmd.UserCallback != IntPtr.Zero)
                     {
                         throw new NotImplementedException();
                     }
-                    else
+
+                    if (pcmd.TextureId != IntPtr.Zero)
                     {
-                        if (pcmd.TextureId != IntPtr.Zero)
-                        {
-                            if (pcmd.TextureId == _fontAtlasID)
-                            {
-                                cl.SetGraphicsResourceSet(1, _fontTextureResourceSet);
-                            }
-                            else
-                            {
-                                cl.SetGraphicsResourceSet(1, GetImageResourceSet(pcmd.TextureId));
-                            }
-                        }
-
-                        cl.SetScissorRect(
-                            0,
-                            (uint) pcmd.ClipRect.X,
-                            (uint) pcmd.ClipRect.Y,
-                            (uint) (pcmd.ClipRect.Z - pcmd.ClipRect.X),
-                            (uint) (pcmd.ClipRect.W - pcmd.ClipRect.Y));
-
-                        cl.DrawIndexed(pcmd.ElemCount, 1, (uint) idx_offset, vtx_offset, 0);
+                        if (pcmd.TextureId == _fontAtlasId)
+                            cl.SetGraphicsResourceSet(1, _fontTextureResourceSet);
+                        else
+                            cl.SetGraphicsResourceSet(1, GetImageResourceSet(pcmd.TextureId));
                     }
 
-                    idx_offset += (int) pcmd.ElemCount;
+                    cl.SetScissorRect(
+                        0,
+                        (uint) pcmd.ClipRect.X,
+                        (uint) pcmd.ClipRect.Y,
+                        (uint) (pcmd.ClipRect.Z - pcmd.ClipRect.X),
+                        (uint) (pcmd.ClipRect.W - pcmd.ClipRect.Y));
+
+                    cl.DrawIndexed(pcmd.ElemCount, 1, (uint) idxOffset, vtxOffset, 0);
+
+                    idxOffset += (int) pcmd.ElemCount;
                 }
 
-                vtx_offset += cmd_list.VtxBuffer.Size;
+                vtxOffset += cmdList.VtxBuffer.Size;
             }
         }
 
-        /// <summary>
-        /// Frees all graphics resources used by the renderer.
-        /// </summary>
-        public void Dispose()
-        {
-            _vertexBuffer.Dispose();
-            _indexBuffer.Dispose();
-            _projMatrixBuffer.Dispose();
-            _fontTexture.Dispose();
-            _fontTextureView.Dispose();
-            _imageTextures.ForEach(x => x.Dispose());
-            _imageTextureViews.ForEach(x => x.Dispose());
-            _vertexShader.Dispose();
-            _fragmentShader.Dispose();
-            _layout.Dispose();
-            _textureLayout.Dispose();
-            _pipeline.Dispose();
-            _mainResourceSet.Dispose();
-
-            foreach (var resource in _ownedResources)
-            {
-                resource.Dispose();
-            }
-        }
-
-        private struct ResourceSetInfo
+        private readonly struct ResourceSetInfo
         {
             public readonly IntPtr ImGuiBinding;
             public readonly ResourceSet ResourceSet;

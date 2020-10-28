@@ -8,29 +8,22 @@ using Aris.Moe.Ocr.Overlay.Translate.Core;
 using Google.Cloud.Vision.V1;
 using Image = Google.Cloud.Vision.V1.Image;
 
-namespace Aris.Moe.Ocr.Overlay.Translate
+namespace Aris.Moe.Ocr.Overlay.Translate.Ocr
 {
     public class GoogleOcr : IOcr
     {
-        private readonly IOcrTranslateOverlayConfiguration _translateOverlayConfiguration;
-        private readonly ISpatialTextConsolidator _spatialTextConsolidator;
         private readonly Point _captureOffset;
-        private readonly Action<string> _log;
         private readonly ImageAnnotatorClient _ocrClient;
 
-        public GoogleOcr(IGoogleConfiguration googleConfiguration, IOcrTranslateOverlayConfiguration translateOverlayConfiguration,
-            ISpatialTextConsolidator spatialTextConsolidator, Action<string> log)
+        public GoogleOcr(IGoogleConfiguration googleConfiguration, IOcrTranslateOverlayConfiguration translateOverlayConfiguration)
         {
             if (string.IsNullOrEmpty(googleConfiguration.KeyPath))
                 throw new ArgumentNullException(nameof(googleConfiguration.KeyPath));
 
             _captureOffset = translateOverlayConfiguration.ScreenArea.Location;
-            _translateOverlayConfiguration = translateOverlayConfiguration;
-            _spatialTextConsolidator = spatialTextConsolidator;
-            _log = log;
             _ocrClient = new ImageAnnotatorClientBuilder
             {
-                CredentialsPath = googleConfiguration.KeyPath,
+                CredentialsPath = googleConfiguration.KeyPath
             }.Build();
         }
 

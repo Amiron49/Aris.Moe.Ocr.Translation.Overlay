@@ -19,7 +19,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
 
         public string Type { get; set; }
 
-        public abstract object? Value{ get; set; }
+        public abstract object? Value { get; set; }
 
         public bool Valid { get; set; } = true;
 
@@ -29,11 +29,9 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
             Type = type;
         }
     }
-    
+
     public class SingleSetting<T> : SingleSetting
     {
-
-
         public override object Value
         {
             get => _valueGetter();

@@ -16,10 +16,9 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
     public interface ITextOverlay
     {
         void Add(params ISpatialText[] texts);
-        void Add(Bitmap image, Rectangle targetArea);
         void ClearAll();
     }
-    
+
     public interface ITargetAreaResizeOverlay
     {
         void AskForResize(Rectangle current, Action<Rectangle?> resultCallback);

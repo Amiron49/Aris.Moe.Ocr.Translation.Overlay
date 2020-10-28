@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Aris.Moe.Ocr.Overlay.Translate.Core;
 
-namespace Aris.Moe.Ocr.Overlay.Translate
+namespace Aris.Moe.Ocr.Overlay.Translate.Ocr
 {
     public class VerticalTextConsolidator : ISpatialTextConsolidator
     {
         public IEnumerable<ISpatialText> Consolidate(IEnumerable<ISpatialText> texts)
         {
             var asList = texts.ToList();
-            
+
             if (!asList.Any())
                 return new ISpatialText[0];
 
@@ -30,10 +29,10 @@ namespace Aris.Moe.Ocr.Overlay.Translate
                 else
                     consolidatedTextItBelongsTo.Combine(text);
             }
-            
+
             return consolidatedTexts;
         }
-        
+
         private static bool BelongToSameText(ISpatialText textA, ISpatialText textB)
         {
             var maxDistanceA = textA.Metrics.AverageLetterWidth + textA.Metrics.AverageLetterHeight;

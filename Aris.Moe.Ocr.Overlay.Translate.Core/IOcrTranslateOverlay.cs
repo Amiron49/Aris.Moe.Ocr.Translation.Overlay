@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Xml.Schema;
 
 namespace Aris.Moe.Ocr.Overlay.Translate.Core
 {

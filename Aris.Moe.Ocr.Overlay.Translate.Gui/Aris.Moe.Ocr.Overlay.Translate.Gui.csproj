@@ -18,6 +18,8 @@
     </ItemGroup>
     <ItemGroup>
         <None Remove="Main.qml" />
+        <Content Include=".private\key.json" />
+        <Content Include=".private\test.jpg" />
         <Content Include="Main.qml">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>

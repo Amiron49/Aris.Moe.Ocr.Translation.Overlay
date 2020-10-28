@@ -20,12 +20,12 @@ namespace Aris.Moe.Overlay
 
         private readonly Vector3 _clearColor = new Vector3(0f, 0f, 0f);
 
-        protected volatile bool Visible = false;
+        protected volatile bool Visible;
 
         public async Task Start()
         {
             _cancellationTokenSource = new CancellationTokenSource();
-            
+
             _renderThread = new Thread(() =>
             {
                 _window = new Sdl2Window(
@@ -35,7 +35,7 @@ namespace Aris.Moe.Overlay
                     1920,
                     1080,
                     SDL_WindowFlags.Borderless |
-                     SDL_WindowFlags.AlwaysOnTop |
+                    SDL_WindowFlags.AlwaysOnTop |
                     SDL_WindowFlags.SkipTaskbar,
                     false);
                 _gd = VeldridStartup.CreateDefaultD3D11GraphicsDevice(
@@ -49,10 +49,10 @@ namespace Aris.Moe.Overlay
                     _window.Height);
                 _window.Resized += () =>
                 {
-                    _gd.MainSwapchain.Resize((uint)_window.Width, (uint)_window.Height);
+                    _gd.MainSwapchain.Resize((uint) _window.Width, (uint) _window.Height);
                     _controller.WindowResized(_window.Width, _window.Height);
                 };
-                
+
 
                 Visible = true;
                 _window.Closing += () => { };
@@ -61,21 +61,21 @@ namespace Aris.Moe.Overlay
                 SetClickAbility(false);
 
                 ThreadIsReady = true;
-                
+
                 MainLoop(_cancellationTokenSource.Token);
             })
             {
                 IsBackground = true
             };
-            
+
             _renderThread.Start();
 
-            for (int i = 0; i < 100; i++)
-            { 
-               await Task.Delay(TimeSpan.FromMilliseconds(10));
+            for (var i = 0; i < 100; i++)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(10));
 
-               if (ThreadIsReady)
-                   break;
+                if (ThreadIsReady)
+                    break;
             }
         }
 
@@ -84,15 +84,12 @@ namespace Aris.Moe.Overlay
             while (_window.Exists && !cancellationToken.IsCancellationRequested)
             {
                 var snapshot = _window.PumpEvents();
-                if (!_window.Exists)
-                {
-                    break;
-                }
+                if (!_window.Exists) break;
 
                 _controller.Update(1f / 60f, snapshot); // Feed the input events to our ImGui controller, which passes them through to ImGui.
 
                 Render();
-                
+
                 _cl.Begin();
                 _cl.SetFramebuffer(_gd.MainSwapchain.Framebuffer);
                 _cl.ClearColorTarget(0, new RgbaFloat(_clearColor.X, _clearColor.Y, _clearColor.Z, 0.0f));
@@ -108,14 +105,14 @@ namespace Aris.Moe.Overlay
 
         protected void SetVisibility(bool visible)
         {
-            WindowsNativeMethods.SetWindowVisibility(_window.Handle, visible); 
+            WindowsNativeMethods.SetWindowVisibility(_window.Handle, visible);
         }
 
         public async Task Stop()
         {
             _cancellationTokenSource.Cancel();
 
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 if (_window?.Exists ?? false)
                     return;
@@ -137,7 +134,7 @@ namespace Aris.Moe.Overlay
         {
             if (_renderThread != null)
                 Stop().Wait();
-            
+
             _gd?.WaitForIdle();
             _controller?.Dispose();
             _cl?.Dispose();

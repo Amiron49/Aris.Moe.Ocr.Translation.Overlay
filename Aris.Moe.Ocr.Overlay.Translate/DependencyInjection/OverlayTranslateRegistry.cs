@@ -1,5 +1,5 @@
-﻿using System;
-using Aris.Moe.Ocr.Overlay.Translate.Core;
+﻿using Aris.Moe.Ocr.Overlay.Translate.Core;
+using Aris.Moe.Ocr.Overlay.Translate.Ocr;
 using Lamar;
 
 namespace Aris.Moe.Ocr.Overlay.Translate.DependencyInjection
@@ -10,7 +10,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.DependencyInjection
         {
             For<IOcrTranslateOverlay>().Use<OcrTranslateOverlay>().Singleton();
             For<IScreenImageProvider>().Use<ScreenProvider>();
-            For<IOverlay>().Use<Overlay>().Singleton();
+            For<IOverlay>().Use<Overlay.Overlay>().Singleton();
             For<IOcr>().Use<GoogleOcr>();
             For<IOcr>().DecorateAllWith<OcrCoordinator>();
             For<ISpatialTextConsolidator>().Use<VerticalTextConsolidator>();

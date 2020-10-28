@@ -43,10 +43,10 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
 
             if (averageLetterHeight == 0)
                 averageLetterHeight = 1;
-            
+
             if (averageLetterWidth == 0)
                 averageLetterWidth = 1;
-            
+
             return new SpatialTextMetrics
             {
                 AverageLetterHeight = averageLetterHeight,
@@ -56,9 +56,9 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
     }
 
     [DebuggerDisplay("{Text} FS:{Metrics.AverageLetterHeight}")]
-    public class AccumulatedSpatialText : SpatialText, ISpatialText
+    public class AccumulatedSpatialText : SpatialText
     {
-        readonly IList<ISpatialText> _spatialTexts = new List<ISpatialText>();
+        private readonly IList<ISpatialText> _spatialTexts = new List<ISpatialText>();
 
         public AccumulatedSpatialText(ISpatialText a) : base(a.Text, a.Area)
         {
@@ -68,7 +68,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
         public override ISpatialText Combine(ISpatialText spatialText)
         {
             _spatialTexts.Add(spatialText);
-            
+
             Area = Rectangle.Union(Area, spatialText.Area);
             Text += spatialText.Text;
 

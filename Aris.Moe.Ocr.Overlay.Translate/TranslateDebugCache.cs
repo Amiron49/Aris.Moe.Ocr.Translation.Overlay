@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Aris.Moe.Ocr.Overlay.Translate
 {
-    public class TranslateDebugCache: ITranslate
+    public class TranslateDebugCache : ITranslate
     {
         private readonly ITranslate _decorated;
         private readonly IOcrTranslateOverlayConfiguration _configuration;
@@ -23,21 +23,21 @@ namespace Aris.Moe.Ocr.Overlay.Translate
             if (!_configuration.PermanentlyCacheExternalOcrResult)
                 return await _decorated.Translate(spatialTexts, targetLanguage, inputLanguage);
 
-            var result = GetCached();
+            var cached = GetCached();
 
-            if (result == null)
-            {
-                result = (await _decorated.Translate(spatialTexts, targetLanguage, inputLanguage)).ToList();
-                Cache(result);
-            }
+            if (cached != null) 
+                return cached;
+            
+            cached = (await _decorated.Translate(spatialTexts, targetLanguage, inputLanguage)).ToList();
+            Cache(cached);
 
-            return result;
+            return cached;
         }
-        
+
         private List<Translation>? GetCached()
         {
             var cacheFilePath = _configuration.CacheFolderRoot + $@"{Path.DirectorySeparatorChar}translate_cache.json";
-            
+
             var cacheExists = File.Exists(cacheFilePath);
 
             if (!cacheExists)
@@ -47,7 +47,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate
 
             if (string.IsNullOrEmpty(content))
                 return null;
-            
+
             var deserialized = JsonConvert.DeserializeObject<List<Translation>>(content);
 
             return new List<Translation>(deserialized);
@@ -56,9 +56,9 @@ namespace Aris.Moe.Ocr.Overlay.Translate
         private void Cache(IEnumerable<Translation> texts)
         {
             var cacheFilePath = _configuration.CacheFolderRoot + $@"{Path.DirectorySeparatorChar}translate_cache.json";
-            
+
             var serialised = JsonConvert.SerializeObject(texts, Formatting.Indented);
-            
+
             File.WriteAllText(cacheFilePath, serialised);
         }
     }

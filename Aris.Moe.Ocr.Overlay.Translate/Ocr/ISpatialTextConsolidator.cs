@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Aris.Moe.Ocr.Overlay.Translate.Core;
 
-namespace Aris.Moe.Ocr.Overlay.Translate
+namespace Aris.Moe.Ocr.Overlay.Translate.Ocr
 {
     /// <summary>
     /// Consolidates Spatial Text to cohesive bigger texts

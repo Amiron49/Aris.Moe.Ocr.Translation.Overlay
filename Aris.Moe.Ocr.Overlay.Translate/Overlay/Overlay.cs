@@ -2,12 +2,12 @@
 using System.Drawing;
 using System.Threading.Tasks;
 using Aris.Moe.Ocr.Overlay.Translate.Core;
-using Aris.Moe.Ocr.Overlay.Translate.OverlayModes;
+using Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes;
 using Aris.Moe.Overlay;
 using Serilog;
 using Rectangle = System.Drawing.Rectangle;
 
-namespace Aris.Moe.Ocr.Overlay.Translate
+namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
 {
     public class Overlay : ImGuiOverlay, IOverlay
     {
@@ -30,7 +30,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate
             _textOverlay = new TextOverlay();
             _resizeOverlay = new TargetAreaResizeOverlay(new Rectangle(0, 0, 1920, 1080), logger);
         }
-        
+
         public async Task Init()
         {
             await Start();
@@ -81,13 +81,9 @@ namespace Aris.Moe.Ocr.Overlay.Translate
         public void ToggleOverlay()
         {
             if (Visible)
-            {
                 HideOverlay();
-            }
             else
-            {
                 ShowOverlay();
-            }
         }
 
         public void AskForResize(Rectangle current, Action<Rectangle?> resultCallback)
