@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Numerics;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using ImGuiNET;
 using Veldrid;
 using PixelFormat = Veldrid.PixelFormat;
-using Rectangle = System.Drawing.Rectangle;
 
 namespace Aris.Moe.Overlay
 {
@@ -75,7 +69,7 @@ namespace Aris.Moe.Overlay
 
             //TODO config
             var sizePixels = 32f;
-            ImGui.GetIO().Fonts.AddFontFromFileTTF(@"E:\Projects\Aris.Moe.Ocr.Overlay.Translate.Cli\.private\NotoSansJP-Medium.otf", sizePixels, null, ImGui.GetIO().Fonts.GetGlyphRangesJapanese());
+            ImGui.GetIO().Fonts.AddFontFromFileTTF(GetTextFilePath(), sizePixels, null, ImGui.GetIO().Fonts.GetGlyphRangesJapanese());
 
             CreateDeviceResources(gd, outputDescription);
             SetKeyMappings();
@@ -86,15 +80,18 @@ namespace Aris.Moe.Overlay
             _frameBegun = true;
         }
 
+        private string GetTextFilePath()
+        {
+            var s = Path.DirectorySeparatorChar;
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $@"Fonts", "NotoSansJP-Medium.otf");
+
+            return path;
+        }
+
         public void WindowResized(int width, int height)
         {
             _windowWidth = width;
             _windowHeight = height;
-        }
-
-        public void DestroyDeviceObjects()
-        {
-            Dispose();
         }
 
         public void CreateDeviceResources(GraphicsDevice gd, OutputDescription outputDescription)
@@ -172,22 +169,6 @@ namespace Aris.Moe.Overlay
         }
 
         /// <summary>
-        /// Gets or creates a handle for a texture to be drawn with ImGui.
-        /// Pass the returned handle to Image() or ImageButton().
-        /// </summary>
-        public IntPtr GetOrCreateImGuiBinding(ResourceFactory factory, Texture texture)
-        {
-            if (!_autoViewsByTexture.TryGetValue(texture, out var textureView))
-            {
-                textureView = factory.CreateTextureView(texture);
-                _autoViewsByTexture.Add(texture, textureView);
-                _ownedResources.Add(textureView);
-            }
-
-            return GetOrCreateImGuiBinding(factory, textureView);
-        }
-
-        /// <summary>
         /// Retrieves the shader texture binding for the given helper handle.
         /// </summary>
         public ResourceSet GetImageResourceSet(IntPtr imGuiBinding)
@@ -198,20 +179,6 @@ namespace Aris.Moe.Overlay
             }
 
             return tvi.ResourceSet;
-        }
-
-        public void ClearCachedImageResources()
-        {
-            foreach (var resource in _ownedResources)
-            {
-                resource.Dispose();
-            }
-
-            _ownedResources.Clear();
-            _setsByView.Clear();
-            _viewsById.Clear();
-            _autoViewsByTexture.Clear();
-            _lastAssignedID = 100;
         }
 
         private byte[] LoadEmbeddedShaderCode(ResourceFactory factory, string name, ShaderStages stage)
@@ -252,61 +219,6 @@ namespace Aris.Moe.Overlay
                 s.Read(ret, 0, (int) s.Length);
                 return ret;
             }
-        }
-
-        public IntPtr AddImageTexture(GraphicsDevice gd, Bitmap bitmap)
-        {
-            bitmap.Save(@"E:\Projects\Aris.Moe.Ocr.Overlay.Translate.Cli\.private\debug.jpg", ImageFormat.Jpeg);
-            
-            long size;
-            using (var ms = new MemoryStream()) // estimatedLength can be original fileLength
-            {
-                bitmap.Save(ms, ImageFormat.Bmp); // save image to stream in Jpeg format
-                size = ms.ToArray().Length;
-            }
-            
-            var bitmapData = bitmap.LockBits(new Rectangle(0,0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb );
-            var betterSize = bitmapData.Stride * bitmap.Height;
-
-            if (bitmap.PixelFormat != System.Drawing.Imaging.PixelFormat.Format32bppArgb)
-            {
-                throw new Exception(
-                    $"Wrong pixel format {Enum.GetName(bitmap.PixelFormat.GetType(), bitmap.PixelFormat)}, expected {Enum.GetName(bitmap.PixelFormat.GetType(), System.Drawing.Imaging.PixelFormat.Format32bppArgb)}");
-            }
-
-            var imageTexture =  gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
-                (uint) bitmap.Width,
-                (uint) bitmap.Height,
-                1,
-                1,
-                PixelFormat.R32_G32_B32_A32_UInt,
-                TextureUsage.Sampled));
-            imageTexture.Name = "Image Texture";
-            
-            _imageTextures.Add(imageTexture);
-
-            // var sizeInBytes = ((32 * (uint)bitmap.Width * (uint)bitmap.Height));
-            
-            gd.UpdateTexture(
-                imageTexture,
-                bitmapData.Scan0,
-                (uint) betterSize,
-                0,
-                0,
-                0,
-                (uint) bitmap.Width / 2,
-                (uint) bitmap.Height / 2,
-                1,
-                0,
-                0);
-            
-            var imageTextureView = gd.ResourceFactory.CreateTextureView(imageTexture);
-
-            _imageTextureViews.Add(imageTextureView);
-            
-            var binding = GetOrCreateImGuiBinding(gd.ResourceFactory, imageTexture);
-
-            return binding;
         }
 
         /// <summary>

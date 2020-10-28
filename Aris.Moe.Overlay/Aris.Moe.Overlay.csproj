@@ -22,5 +22,12 @@
       <PackageReference Include="Veldrid.ImGui" Version="5.72.0" />
       <PackageReference Include="Veldrid.StartupUtilities" Version="4.8.0" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <None Remove="Fonts\NotoSansJP-Medium.otf" />
+      <Content Include="Fonts\NotoSansJP-Medium.otf">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
 
 </Project>

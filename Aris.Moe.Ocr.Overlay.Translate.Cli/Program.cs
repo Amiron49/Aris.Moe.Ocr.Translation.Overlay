@@ -17,7 +17,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Cli
 
             ocrTranslateOverlay.ShowOverlay();
 
-            var result = "";
+            string result;
             do
             {
                 Console.WriteLine("t: translate");
@@ -29,17 +29,17 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Cli
 
                 Console.WriteLine();
 
-                if (result == "t")
+                switch (result)
                 {
-                    await ocrTranslateOverlay.TranslateScreen();
-                }
-                else if (result == "o")
-                {
-                    ocrTranslateOverlay.ToggleOverlay();
-                }
-                else if (result == "r")
-                {
-                    await ocrTranslateOverlay.OcrScreen();
+                    case "t":
+                        await ocrTranslateOverlay.TranslateScreen();
+                        break;
+                    case "o":
+                        ocrTranslateOverlay.ToggleOverlay();
+                        break;
+                    case "r":
+                        await ocrTranslateOverlay.OcrScreen();
+                        break;
                 }
             } while (result != "x");
         }
