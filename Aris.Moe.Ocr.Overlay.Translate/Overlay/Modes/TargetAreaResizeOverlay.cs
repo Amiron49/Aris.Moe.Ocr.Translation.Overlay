@@ -3,8 +3,8 @@ using System.Drawing;
 using System.Numerics;
 using Aris.Moe.Ocr.Overlay.Translate.Core;
 using ImGuiNET;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Serilog;
 
 namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
 {
@@ -61,7 +61,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
             }
         }
 
-        public TargetAreaResizeOverlay(Rectangle screenSize, ILogger logger)
+        public TargetAreaResizeOverlay(Rectangle screenSize, ILogger<TargetAreaResizeOverlay> logger)
         {
             _screenSize = screenSize;
             _logger = logger;
@@ -116,7 +116,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
             if (_currentResizeOperation == null || _currentResizeOperation.OperationOver)
                 return;
 
-            _logger.Debug(JsonConvert.SerializeObject(_currentResizeOperation));
+            _logger.LogDebug(JsonConvert.SerializeObject(_currentResizeOperation));
 
             if (!_currentResizeOperation.CurrentlyDragging)
             {

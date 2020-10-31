@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Aris.Moe.Ocr.Overlay.Translate.Core;
 using Lamar;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 
 namespace Aris.Moe.Ocr.Overlay.Translate.Gui
@@ -10,17 +12,21 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
     {
         public static IContainer Services = null!;
 
-        private static async Task<int> Main()
+        private static async Task<int> Main(string[] args)
         {
+            var fileLoggingLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, "logs", "emergency.log");
+            
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
+                .WriteTo.File(fileLoggingLocation)
                 .CreateLogger();
 
             try
             {
-                var config = new Config();
-                Services = new Container(new OverlayTranslateGuiRegistry(config, Log.Logger));
+                var config = BuildConfiguration(args);
+
+                Services = new Container(new OverlayTranslateGuiRegistry(config));
 
                 using (Services)
                 {
@@ -38,6 +44,19 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
 
             Log.CloseAndFlush();
             return 0;
+        }
+
+        private static Configuration BuildConfiguration(string[] args)
+        {
+            var configurationProvider =
+                new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json", true)
+                    .AddJsonFile("appsettings.Debug.json", true)
+                    .AddCommandLine(args).Build();
+
+            var config = new Configuration();
+            configurationProvider.Bind(config);
+            return config;
         }
     }
 }

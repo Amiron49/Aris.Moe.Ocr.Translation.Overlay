@@ -6,9 +6,9 @@ import QtQuick.Controls.Material 2.1
 ApplicationWindow {
     id: window
     visible: true
-    width: 640
-    height: 480
-    title: qsTr("Hello World")
+    width: 530
+    height: 140
+    title: qsTr("Aris.Moe Translation Overlay")
     
     menuBar: MenuBar {
         Menu {
@@ -21,12 +21,12 @@ ApplicationWindow {
                 text: qsTr("Exit")
                 onTriggered: Qt.quit();
             }
-            MenuItem {
-                text: qsTr("Settings")
-                onTriggered: {
-                    stackView.push("Pages/Settings.qml")
-                }
-            }
+//            MenuItem {
+//                text: qsTr("Settings")
+//                onTriggered: {
+//                    stackView.push("Pages/Settings.qml")
+//                }
+//            }
         }
     }
     //Content Area
@@ -34,12 +34,12 @@ ApplicationWindow {
     ColumnLayout{
  
     
-        Button {
-            text: 'Back'
-            onClicked: {
-                stackView.pop()
-            }
-        }
+//        Button {
+//            text: 'Back'
+//            onClicked: {
+//                stackView.pop()
+//            }
+//        }
             
         StackView {
             id: stackView
