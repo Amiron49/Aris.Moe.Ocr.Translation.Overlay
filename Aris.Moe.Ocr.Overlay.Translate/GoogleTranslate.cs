@@ -6,6 +6,7 @@ using Aris.Moe.Ocr.Overlay.Translate.Core;
 using Google.Api.Gax.ResourceNames;
 using Google.Cloud.Translate.V3;
 using Google.Protobuf.Collections;
+using Microsoft.Extensions.Logging;
 using Translation = Aris.Moe.Ocr.Overlay.Translate.Core.Translation;
 
 namespace Aris.Moe.Ocr.Overlay.Translate
@@ -13,16 +14,16 @@ namespace Aris.Moe.Ocr.Overlay.Translate
     public class GoogleTranslate : ITranslate
     {
         private readonly IGoogleConfiguration _googleConfiguration;
-        private readonly Action<string> _log;
+        private readonly ILogger<GoogleTranslate> _log;
         private readonly TranslationServiceClient _translateClient;
 
-        public GoogleTranslate(IGoogleConfiguration googleConfiguration, Action<string> log)
+        public GoogleTranslate(IGoogleConfiguration googleConfiguration, ILogger<GoogleTranslate> logger)
         {
             if (string.IsNullOrEmpty(googleConfiguration.KeyPath))
                 throw new ArgumentNullException(nameof(googleConfiguration.KeyPath));
 
             _googleConfiguration = googleConfiguration;
-            _log = log;
+            _log = logger;
 
             _translateClient = new TranslationServiceClientBuilder
             {
@@ -41,7 +42,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate
 
             if (googleTranslations.Count != spatialTexts.Count())
             {
-                _log($"ocr count ({spatialTexts.Count()}) and translation count {googleTranslations.Count} mismatch");
+                _log.LogWarning($"ocr count ({spatialTexts.Count}) and translation count {googleTranslations.Count} mismatch");
                 return new Translation[0];
             }
 
@@ -61,7 +62,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate
 
             if (!untranslatedTexts.Any())
             {
-                _log("No texts given for translation");
+                _log.LogWarning("No texts given for translation");
                 return new RepeatedField<Google.Cloud.Translate.V3.Translation>();
             }
 

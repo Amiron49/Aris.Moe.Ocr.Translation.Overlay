@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Aris.Moe.Ocr.Overlay.Translate.Core;
 using Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes;
 using Aris.Moe.Overlay;
-using Serilog;
+using Microsoft.Extensions.Logging;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
@@ -25,7 +25,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
 
         private OverlayMode _currentMode = OverlayMode.TextOverlay;
 
-        public Overlay(ILogger logger)
+        public Overlay(ILogger<TargetAreaResizeOverlay> logger)
         {
             _textOverlay = new TextOverlay();
             _resizeOverlay = new TargetAreaResizeOverlay(new Rectangle(0, 0, 1920, 1080), logger);

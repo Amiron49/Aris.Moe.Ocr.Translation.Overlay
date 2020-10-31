@@ -4,7 +4,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
 {
     public interface IOcrTranslateOverlayConfiguration
     {
-        Rectangle ScreenArea { get; set; }
+        Rectangle CaptureArea { get; set; }
         string? SourceLanguage { get; set; }
         string TargetLanguage { get; set; }
 

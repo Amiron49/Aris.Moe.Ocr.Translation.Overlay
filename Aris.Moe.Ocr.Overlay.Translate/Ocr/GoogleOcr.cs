@@ -12,15 +12,13 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Ocr
 {
     public class GoogleOcr : IOcr
     {
-        private readonly Point _captureOffset;
         private readonly ImageAnnotatorClient _ocrClient;
 
-        public GoogleOcr(IGoogleConfiguration googleConfiguration, IOcrTranslateOverlayConfiguration translateOverlayConfiguration)
+        public GoogleOcr(IGoogleConfiguration googleConfiguration)
         {
             if (string.IsNullOrEmpty(googleConfiguration.KeyPath))
                 throw new ArgumentNullException(nameof(googleConfiguration.KeyPath));
 
-            _captureOffset = translateOverlayConfiguration.ScreenArea.Location;
             _ocrClient = new ImageAnnotatorClientBuilder
             {
                 CredentialsPath = googleConfiguration.KeyPath
@@ -62,7 +60,6 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Ocr
             var size = new Size(bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y);
 
             var rectangle = new Rectangle(position, size);
-            rectangle.Offset(_captureOffset);
 
             return new SpatialText(annotation.Description, rectangle);
         }

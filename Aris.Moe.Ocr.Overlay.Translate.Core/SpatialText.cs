@@ -11,6 +11,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
         Rectangle Area { get; }
         SpatialTextMetrics Metrics { get; }
         ISpatialText Combine(ISpatialText spatialText);
+        void Move(Point vector);
     }
 
     [DebuggerDisplay("{Text} FS:{Metrics.AverageLetterHeight}")]
@@ -25,6 +26,11 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
         public virtual ISpatialText Combine(ISpatialText spatialText)
         {
             return new AccumulatedSpatialText(this).Combine(spatialText);
+        }
+
+        public void Move(Point vector)
+        {
+            Area = new Rectangle(new Point(Area.Location.X + vector.X, Area.Location.Y + vector.Y), Area.Size);
         }
 
         public SpatialText(string text, Rectangle area)

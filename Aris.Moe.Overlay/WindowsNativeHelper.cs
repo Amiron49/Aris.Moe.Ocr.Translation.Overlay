@@ -75,29 +75,20 @@ namespace Aris.Moe.Overlay
             SetForegroundWindow(handle);
         }
 
-        /// <summary>
-        /// Returns the current mouse position w.r.t the window in Vector2 format.
-        /// Also, returns Zero in case of any errors.
-        /// </summary>
-        /// <param name="hWnd"></param>
-        /// <returns></returns>
-        internal static Vector2 GetCursorPosition(IntPtr hWnd)
+        public static Rectangle VirtualScreen
         {
-            if (GetCursorPos(out var lpPoint))
+            get
             {
-                ScreenToClient(hWnd, ref lpPoint);
-                return lpPoint;
+                if (MultiMonitorSupport)
+                    return new Rectangle(GetSystemMetrics(76), GetSystemMetrics(77), GetSystemMetrics(78), GetSystemMetrics(79));
+                var primaryMonitorSize = PrimaryMonitorSize;
+                return new Rectangle(0, 0, primaryMonitorSize.Width, primaryMonitorSize.Height);
             }
-
-            return Vector2.Zero;
         }
 
-        [DllImport("user32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool GetCursorPos(out POINT lpPoint);
+        private static bool MultiMonitorSupport  => GetSystemMetrics(80) > 0U;
 
-        [DllImport("user32.dll")]
-        private static extern bool ScreenToClient(IntPtr hWnd, ref POINT lpPoint);
+        private static Size PrimaryMonitorSize => new Size(GetSystemMetrics(0), GetSystemMetrics(1));
 
         [DllImport("dwmapi.dll")]
         private static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref Margins pMarInset);
@@ -114,6 +105,9 @@ namespace Aris.Moe.Overlay
         [DllImport("user32.dll", EntryPoint = "ShowWindow", SetLastError = true)]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern int GetSystemMetrics(int nIndex);
+        
         [StructLayout(LayoutKind.Sequential)]
         private struct Margins
         {
