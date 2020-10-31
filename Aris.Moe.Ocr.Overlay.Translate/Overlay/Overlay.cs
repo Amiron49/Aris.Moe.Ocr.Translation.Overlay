@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Drawing;
 using System.Threading.Tasks;
 using Aris.Moe.Ocr.Overlay.Translate.Core;
 using Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes;
 using Aris.Moe.Overlay;
+using Aris.Moe.ScreenHelpers;
 using Microsoft.Extensions.Logging;
 using Rectangle = System.Drawing.Rectangle;
 
@@ -25,7 +25,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
 
         private OverlayMode _currentMode = OverlayMode.TextOverlay;
 
-        public Overlay(ILogger<TargetAreaResizeOverlay> logger)
+        public Overlay(IScreenInformation screenInformation, ILogger<TargetAreaResizeOverlay> logger) : base(screenInformation)
         {
             _textOverlay = new TextOverlay();
             _resizeOverlay = new TargetAreaResizeOverlay(new Rectangle(0, 0, 1920, 1080), logger);
@@ -54,11 +54,6 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
         public void Add(params ISpatialText[] texts)
         {
             _textOverlay.Add(texts);
-        }
-
-        public void Add(Bitmap image, Rectangle targetArea)
-        {
-            //TODO I will never do :v
         }
 
         public void ClearAll()

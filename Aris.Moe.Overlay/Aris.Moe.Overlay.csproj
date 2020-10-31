@@ -18,10 +18,12 @@
     
     <ItemGroup>
       <PackageReference Include="ImGui.NET" Version="1.78.0" />
-      <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
+      <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="3.1.6" />
       <PackageReference Include="NativeLibraryLoader" Version="1.0.12" />
+      <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
       <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
       <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
+      <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
       <PackageReference Include="Veldrid.ImGui" Version="5.72.0" />
       <PackageReference Include="Veldrid.StartupUtilities" Version="4.8.0" />
     </ItemGroup>
@@ -31,6 +33,10 @@
       <Content Include="Fonts\NotoSansJP-Medium.otf">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\Aris.Moe.ScreenHelpers\Aris.Moe.ScreenHelpers.csproj" />
     </ItemGroup>
 
 </Project>

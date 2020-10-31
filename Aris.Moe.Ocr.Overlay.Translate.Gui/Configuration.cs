@@ -12,6 +12,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
         public string TargetLanguage { get; set; } = "en";
         public bool PermanentlyCacheExternalOcrResult { get; set; } = false;
         public bool PermanentlyCacheExternalTranslateResult { get; set; } = false;
+        public bool DebugCapturedImage { get; set; } = false;
         public string CacheFolderRoot { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, ".cache");
 
         public GoogleConfiguration Google { get; set; }

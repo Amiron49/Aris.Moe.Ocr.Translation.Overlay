@@ -2,6 +2,7 @@
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+using Aris.Moe.ScreenHelpers;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
@@ -10,6 +11,7 @@ namespace Aris.Moe.Overlay
 {
     public abstract class ImGuiOverlay : IDisposable
     {
+        private readonly IScreenInformation _screenInformation;
         private volatile Sdl2Window _window;
         private GraphicsDevice _gd;
         private CommandList _cl;
@@ -22,18 +24,25 @@ namespace Aris.Moe.Overlay
 
         protected volatile bool Visible;
 
+        public ImGuiOverlay(IScreenInformation screenInformation)
+        {
+            _screenInformation = screenInformation;
+        }
+        
         public async Task Start()
         {
             _cancellationTokenSource = new CancellationTokenSource();
 
+            var totalScreen = _screenInformation.ScreenArea;
+            
             _renderThread = new Thread(() =>
             {
                 _window = new Sdl2Window(
                     "Overlay",
-                    0,
-                    0,
-                    1920,
-                    1080,
+                    totalScreen.X,
+                    totalScreen.Y,
+                    totalScreen.Width,
+                    totalScreen.Height,
                     SDL_WindowFlags.Borderless |
                     SDL_WindowFlags.AlwaysOnTop |
                     SDL_WindowFlags.SkipTaskbar,

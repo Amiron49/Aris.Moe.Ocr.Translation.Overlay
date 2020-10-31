@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -90,12 +92,39 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
             await Task.Delay(TimeSpan.FromSeconds(0.2));
 
             _log.LogInformation("Capturing screen");
-            var screenImage = _screenImageProvider.Get(captureLocation);
+            
+            var (stream, bitmap) = _screenImageProvider.Get(captureLocation);
 
-            _log.LogInformation("Ocr-ing the image");
-            var recognizedTextboxes = await _ocr.Ocr(screenImage.Stream, _ocrTranslateOverlayConfiguration.SourceLanguage);
+            using (stream)
+            {
+                using (bitmap)
+                {
+                    if (_ocrTranslateOverlayConfiguration.DebugCapturedImage)
+                        await DebugImage(stream, bitmap);
+            
+                    _log.LogInformation("Ocr-ing the image");
+                    var recognizedTextboxes = await _ocr.Ocr(stream, _ocrTranslateOverlayConfiguration.SourceLanguage);
 
-            return recognizedTextboxes.ToList();
+                    return recognizedTextboxes.ToList();
+                }
+            }
+        }
+
+        private async Task DebugImage(Stream stream, Image bitmap)
+        {
+            var currentPosition = stream.Position;
+
+            using (var ms = new MemoryStream())
+            {
+                if (!Directory.Exists(_ocrTranslateOverlayConfiguration.CacheFolderRoot))
+                    Directory.CreateDirectory(_ocrTranslateOverlayConfiguration.CacheFolderRoot);
+
+                await stream.CopyToAsync(ms);
+                File.WriteAllBytes(Path.Combine(_ocrTranslateOverlayConfiguration.CacheFolderRoot, "capture-stream.png"), ms.ToArray());
+                bitmap.Save(Path.Combine(_ocrTranslateOverlayConfiguration.CacheFolderRoot, "capture-bmp.png"), ImageFormat.Png);
+            }
+
+            stream.Position = currentPosition;
         }
 
         private ISpatialText CorrectForCaptureArea(ISpatialText spatialText)
