@@ -40,7 +40,4 @@ ApplicationWindow {
         }
         
     }
-    MainModel {
-        id: model
-    }
 }
