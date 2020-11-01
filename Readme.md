@@ -18,10 +18,6 @@ giving access to a `project` where the `Cloud Translation API` and `Cloud Vision
 - Put that file in a Folder called `.private` next to the executable and name it `key.json`
 - Edit the appsettings.json and set the `Google.ProjectId` to the `projectId` the service account is assigned to 
 
-So what you need is a Google Cloud [service account key file](https://cloud.google.com/bigquery/docs/authentication/service-account-file)
-which you can create as explained by their [documentation](https://cloud.google.com/docs/authentication/production#create_service_account).
-that has access to Tra
-
 ## Planned features
 
 - Other non google reliant OCR and Translation services
