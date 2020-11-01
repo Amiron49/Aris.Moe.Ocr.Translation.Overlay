@@ -16,7 +16,7 @@ jobs:
       with:
         dotnet-version: 3.1.301
     - name: Install dependencies
-      run: dotnet restore --configuration Release --runtime win10-x64
+      run: dotnet restore --runtime win10-x64
     - name: Build
       run: dotnet build --configuration Release --runtime win10-x64 --no-restore
     - name: Publish
