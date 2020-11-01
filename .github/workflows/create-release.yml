@@ -15,12 +15,8 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.301
-    - name: Install dependencies
-      run: dotnet restore --runtime win10-x64
-    - name: Build
-      run: dotnet build --configuration Release --runtime win10-x64 --no-restore
     - name: Publish
-      run: dotnet publish --configuration Release --runtime win10-x64 --no-restore --no-build --no-self-contained
+      run: dotnet publish --configuration Release --runtime win10-x64 --no-self-contained
     - name: ZipiddyZip
       run: zip -r moe-translation-overlay-win-x64.zip ./Aris.Moe.Ocr.Overlay.Translate.Gui/bin/Release/netcoreapp3.0/win10-x64/publish
     - name: Create Release
