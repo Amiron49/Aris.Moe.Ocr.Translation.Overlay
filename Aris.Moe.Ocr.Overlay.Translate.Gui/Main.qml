@@ -2,6 +2,7 @@ import QtQuick 2.9
 import QtQuick.Layouts 1.3
 import QtQuick.Controls 2.3
 import QtQuick.Controls.Material 2.1
+import Aris.Moe.Ocr.Overlay.Translate.Gui 1.1
 
 ApplicationWindow {
     id: window
@@ -31,20 +32,15 @@ ApplicationWindow {
     }
     //Content Area
     
-    ColumnLayout{
- 
-    
-//        Button {
-//            text: 'Back'
-//            onClicked: {
-//                stackView.pop()
-//            }
-//        }
-            
+    ColumnLayout{            
         StackView {
             id: stackView
     
             initialItem: "Pages/Controls.qml"
         }
+        
+    }
+    MainModel {
+        id: model
     }
 }

@@ -3,42 +3,50 @@ import QtQuick.Controls 2.1
 import Aris.Moe.Ocr.Overlay.Translate.Gui 1.1
 
 ScrollablePage {
-    Grid {
-        columns: 6
-        spacing: 12
+    Column {
         width: parent.width
-    
-        Button {
-            text: 'Translate'
-            onClicked: {
-                var task = model.translateScreen()
-                Net.await(task, function() {
-                })
+        Row {
+            spacing: 12
+            
+            Button {
+                text: 'Translate'
+                onClicked: {
+                    var task = model.translateScreen()
+                    Net.await(task, function() {
+                    })
+                }
+            }
+            
+            Button {
+                text: 'Hide Overlay'
+                onClicked: {
+                    model.hideOverlay()
+                }
+            }
+            
+            Button {
+                text: 'Show Overlay'
+                onClicked: {
+                    model.showOverlay()
+                }
+            }
+            
+            Button {
+                text: 'Change Target area'
+                onClicked: {
+                    model.askForTargetResize()
+                }
+            }
+        
+            ControlsModel {
+                id: model
             }
         }
         
-        Button {
-            text: 'Hide Overlay'
-            onClicked: {
-                model.hideOverlay()
-            }
-        }
-        
-        Button {
-            text: 'Show Overlay'
-            onClicked: {
-                model.showOverlay()
-            }
-        }
-        
-        Button {
-            text: 'Change Target area'
-            onClicked: {
-                model.askForTargetResize()
-            }
-        }
-        ControlsModel {
-            id: model
+        Text {
+            font.pointSize: 9
+            textFormat: Text.PlainText
+            text: model.getErrors()
         }
     }
 }
