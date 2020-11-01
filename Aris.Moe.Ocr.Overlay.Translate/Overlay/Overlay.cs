@@ -28,7 +28,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
         public Overlay(IScreenInformation screenInformation, ILogger<TargetAreaResizeOverlay> logger) : base(screenInformation)
         {
             _textOverlay = new TextOverlay();
-            _resizeOverlay = new TargetAreaResizeOverlay(new Rectangle(0, 0, 1920, 1080), logger);
+            _resizeOverlay = new TargetAreaResizeOverlay(screenInformation, logger);
         }
 
         public async Task Init()
@@ -86,7 +86,6 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
             _currentMode = OverlayMode.ResizeTargetOverlay;
 
             SetClickAbility(true);
-            //BringToForeground();
             ShowOverlay();
 
             _resizeOverlay.AskForResize(current, resultRectangle =>

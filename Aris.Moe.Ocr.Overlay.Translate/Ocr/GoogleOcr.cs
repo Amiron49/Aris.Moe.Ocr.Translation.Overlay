@@ -10,19 +10,19 @@ using Image = Google.Cloud.Vision.V1.Image;
 
 namespace Aris.Moe.Ocr.Overlay.Translate.Ocr
 {
-    public class GoogleOcr : IOcr
+    public class GoogleOcr : IOcr, INeedConfiguration
     {
-        private readonly ImageAnnotatorClient _ocrClient;
+        private readonly IGoogleConfiguration _googleConfiguration;
+        private readonly Lazy<ImageAnnotatorClient> _ocrClientLazy;
 
         public GoogleOcr(IGoogleConfiguration googleConfiguration)
         {
-            if (string.IsNullOrEmpty(googleConfiguration.KeyPath))
-                throw new ArgumentNullException(nameof(googleConfiguration.KeyPath));
+            _googleConfiguration = googleConfiguration;
 
-            _ocrClient = new ImageAnnotatorClientBuilder
+            _ocrClientLazy = new Lazy<ImageAnnotatorClient>(() => new ImageAnnotatorClientBuilder
             {
                 CredentialsPath = googleConfiguration.KeyPath
-            }.Build();
+            }.Build());
         }
 
         public async Task<IEnumerable<ISpatialText>> Ocr(Stream image, string? inputLanguage = null)
@@ -46,12 +46,12 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Ocr
             if (inputLanguage != null)
                 imageContext.LanguageHints.Add(inputLanguage);
 
-            var response = await _ocrClient.DetectTextAsync(googleImage, imageContext);
+            var response = await _ocrClientLazy.Value.DetectTextAsync(googleImage, imageContext);
 
             return response;
         }
 
-        private SpatialText ConvertToSpatialText(EntityAnnotation annotation)
+        private static SpatialText ConvertToSpatialText(EntityAnnotation annotation)
         {
             var topLeft = annotation.BoundingPoly.Vertices[0];
             var bottomRight = annotation.BoundingPoly.Vertices[2];
@@ -62,6 +62,15 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Ocr
             var rectangle = new Rectangle(position, size);
 
             return new SpatialText(annotation.Description, rectangle);
+        }
+
+        public string Name { get; } = "Google Ocr V3";
+        public IEnumerable<string> GetConfigurationIssues()
+        {
+            if (string.IsNullOrEmpty(_googleConfiguration.KeyPath))
+                yield return $"'{nameof(IGoogleConfiguration.KeyPath)}': is not set. A private key enabled to access the Google Ocr V3 Api is needed";
+            else if (!File.Exists(_googleConfiguration.KeyPath))
+                yield return $"Couldn't find google key file @ {_googleConfiguration.KeyPath}. A private key enabled to access the Google Ocr Api is needed";
         }
     }
 }

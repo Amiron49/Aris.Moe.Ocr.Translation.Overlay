@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Aris.Moe.Ocr.Overlay.Translate.Core;
@@ -11,24 +12,21 @@ using Translation = Aris.Moe.Ocr.Overlay.Translate.Core.Translation;
 
 namespace Aris.Moe.Ocr.Overlay.Translate
 {
-    public class GoogleTranslate : ITranslate
+    public class GoogleTranslate : ITranslate, INeedConfiguration
     {
         private readonly IGoogleConfiguration _googleConfiguration;
         private readonly ILogger<GoogleTranslate> _log;
-        private readonly TranslationServiceClient _translateClient;
+        private readonly Lazy<TranslationServiceClient> _translateClientLazy;
 
         public GoogleTranslate(IGoogleConfiguration googleConfiguration, ILogger<GoogleTranslate> logger)
         {
-            if (string.IsNullOrEmpty(googleConfiguration.KeyPath))
-                throw new ArgumentNullException(nameof(googleConfiguration.KeyPath));
-
             _googleConfiguration = googleConfiguration;
             _log = logger;
 
-            _translateClient = new TranslationServiceClientBuilder
+            _translateClientLazy = new Lazy<TranslationServiceClient>(() => new TranslationServiceClientBuilder
             {
                 CredentialsPath = googleConfiguration.KeyPath
-            }.Build();
+            }.Build());
         }
 
         public Task<IEnumerable<Translation>> Translate(IEnumerable<ISpatialText> spatialTexts, string? targetLanguage = "en", string? inputLanguage = null)
@@ -78,9 +76,21 @@ namespace Aris.Moe.Ocr.Overlay.Translate
                 ParentAsLocationName = new LocationName(_googleConfiguration.ProjectId, _googleConfiguration.LocationId)
             };
 
-            var response = await _translateClient.TranslateTextAsync(request);
+            var response = await _translateClientLazy.Value.TranslateTextAsync(request);
 
             return response.Translations;
+        }
+
+        public string Name { get; } = "Google-Translate-V3";
+        public IEnumerable<string> GetConfigurationIssues()
+        {
+            if (string.IsNullOrEmpty(_googleConfiguration.KeyPath))
+                yield return $"'{nameof(IGoogleConfiguration.KeyPath)}': is not set. A private key enabled to access the V3Translation Api is needed";
+            else if (!File.Exists(_googleConfiguration.KeyPath))
+                yield return $"Couldn't find google key file @ {_googleConfiguration.KeyPath}. A private key enabled to access the V3Translation Api is needed";
+            
+            if (string.IsNullOrEmpty(_googleConfiguration.LocationId))
+                yield return $"'{nameof(IGoogleConfiguration.ProjectId)}': is not set. Your own google cloud projectId must be given for it to work. Also the TranslateV3 Api must be enabled for that project";
         }
     }
 }

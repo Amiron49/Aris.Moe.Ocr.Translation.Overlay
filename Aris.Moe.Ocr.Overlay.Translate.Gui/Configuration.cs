@@ -23,7 +23,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
     {
         public string? KeyPath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, ".private", "key.json");
         public string? ProjectId { get; set; }
-        public string? LocationId { get; set; }
+        public string? LocationId { get; set; } = "global";
     }
 
     public interface ILoggingConfiguration

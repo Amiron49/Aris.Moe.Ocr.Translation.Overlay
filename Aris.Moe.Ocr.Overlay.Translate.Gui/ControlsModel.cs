@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Aris.Moe.Ocr.Overlay.Translate.Core;
 
 namespace Aris.Moe.Ocr.Overlay.Translate.Gui
@@ -44,6 +46,32 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
 
         public void Dispose()
         {
+        }
+        public string GetErrors()
+        {
+            var needConfigurations = Program.Services.GetAllInstances<INeedConfiguration>();
+
+            var withIssues = needConfigurations
+                .Select(x => (Name: x.Name, Issues: x.GetConfigurationIssues().ToList())).Where(x => x.Issues.Any()).ToList();
+
+            if (!withIssues.Any())
+                return "Configuration seems fine";
+
+            var builder = new StringBuilder();
+
+            builder.AppendLine($"Configuration issues:");
+
+            foreach (var (name, issues) in withIssues)
+            {
+                builder.AppendLine($"### {name} ###");
+
+                foreach (var issue in issues)
+                {
+                    builder.AppendLine("- " + issue);
+                }
+            }
+
+            return builder.ToString();
         }
     }
 }
