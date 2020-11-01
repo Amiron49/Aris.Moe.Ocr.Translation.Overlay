@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Numerics;
 using Aris.Moe.Ocr.Overlay.Translate.Core;
+using Aris.Moe.ScreenHelpers;
 using ImGuiNET;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -17,9 +18,6 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
                                                       ImGuiWindowFlags.NoTitleBar |
                                                       ImGuiWindowFlags.NoResize |
                                                       ImGuiWindowFlags.NoInputs;
-
-        private readonly Rectangle _screenSize;
-        private readonly ILogger _logger;
 
 
         private class ResizeOperation
@@ -60,10 +58,13 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
                 return DragStart.Value.ToRectangleWithUnknownPointOrder(DragEnd.Value);
             }
         }
+        
+        private readonly IScreenInformation _screenInformation;
+        private readonly ILogger _logger;
 
-        public TargetAreaResizeOverlay(Rectangle screenSize, ILogger<TargetAreaResizeOverlay> logger)
+        public TargetAreaResizeOverlay(IScreenInformation screenInformation, ILogger<TargetAreaResizeOverlay> logger)
         {
-            _screenSize = screenSize;
+            _screenInformation = screenInformation;
             _logger = logger;
         }
 
@@ -181,7 +182,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
 
         private void RenderBackdrop(Action inner)
         {
-            ImGui.SetNextWindowSize(new Vector2(_screenSize.Width, _screenSize.Height));
+            ImGui.SetNextWindowSize(new Vector2(_screenInformation.ScreenArea.Width, _screenInformation.ScreenArea.Height));
             ImGui.SetNextWindowPos(new Vector2(0, 0));
             ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.6f);
 

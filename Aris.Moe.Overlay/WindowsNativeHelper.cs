@@ -72,23 +72,8 @@ namespace Aris.Moe.Overlay
 
         internal static void BringToForeground(IntPtr handle)
         {
-            SetForegroundWindow(handle);
+            SwitchToThisWindow(handle, true);
         }
-
-        public static Rectangle VirtualScreen
-        {
-            get
-            {
-                if (MultiMonitorSupport)
-                    return new Rectangle(GetSystemMetrics(76), GetSystemMetrics(77), GetSystemMetrics(78), GetSystemMetrics(79));
-                var primaryMonitorSize = PrimaryMonitorSize;
-                return new Rectangle(0, 0, primaryMonitorSize.Width, primaryMonitorSize.Height);
-            }
-        }
-
-        private static bool MultiMonitorSupport  => GetSystemMetrics(80) > 0U;
-
-        private static Size PrimaryMonitorSize => new Size(GetSystemMetrics(0), GetSystemMetrics(1));
 
         [DllImport("dwmapi.dll")]
         private static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref Margins pMarInset);
@@ -107,7 +92,10 @@ namespace Aris.Moe.Overlay
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern int GetSystemMetrics(int nIndex);
-        
+
+        [DllImport("user32.dll")]
+        public static extern void SwitchToThisWindow(IntPtr hWnd, bool turnon);
+
         [StructLayout(LayoutKind.Sequential)]
         private struct Margins
         {
