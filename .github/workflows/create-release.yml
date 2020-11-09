@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
@@ -18,7 +18,7 @@ jobs:
     - name: Publish
       run: dotnet publish --configuration Release --runtime win10-x64 --no-self-contained
     - name: ZipiddyZip
-      run: zip -r moe-translation-overlay-win-x64.zip ./Aris.Moe.Ocr.Overlay.Translate.Gui/bin/Release/netcoreapp3.0/win10-x64/publish
+      run: Compress-Archive -Path Aris.Moe.Ocr.Overlay.Translate.Gui\bin\Release\netcoreapp3.0\win10-x64\publish\* -DestinationPath .\moe-translation-overlay-win-x64.zip
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
