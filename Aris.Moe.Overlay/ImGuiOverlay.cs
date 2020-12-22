@@ -90,13 +90,7 @@ namespace Aris.Moe.Overlay
 
             _renderThread.Start();
 
-            for (var i = 0; i < 100; i++)
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(10));
-
-                if (ThreadIsReady)
-                    break;
-            }
+            await SpinWait(() => ThreadIsReady);
         }
 
         private void MainLoop(CancellationToken cancellationToken)
@@ -131,14 +125,7 @@ namespace Aris.Moe.Overlay
         public async Task Stop()
         {
             _cancellationTokenSource.Cancel();
-
-            for (var i = 0; i < 10; i++)
-            {
-                if (_window?.Exists ?? false)
-                    return;
-
-                await Task.Delay(TimeSpan.FromSeconds(1 / 10d));
-            }
+            await SpinWait(() => _renderThread.IsAlive);
         }
 
         protected virtual void Render()
@@ -150,10 +137,23 @@ namespace Aris.Moe.Overlay
             WindowsNativeMethods.SetOverlayClickable(_window.Handle, clickable);
         }
 
+        private static async Task SpinWait(Func<bool> stopWaitingCondition)
+        {
+            for (var i = 0; i < 10; i++)
+            {
+                if (stopWaitingCondition())
+                    return;
+
+                await Task.Delay(TimeSpan.FromSeconds(1 / 10d));
+            }
+        }
+        
         public void Dispose()
         {
-            if (_renderThread != null)
+            if (_renderThread.IsAlive)
+            {
                 Stop().Wait();
+            }
 
             _gd?.WaitForIdle();
             _controller?.Dispose();

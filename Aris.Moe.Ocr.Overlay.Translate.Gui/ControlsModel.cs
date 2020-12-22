@@ -43,6 +43,11 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
         {
             _translateOverlay.AskForTargetResize();
         }
+        
+        public void DisplayProgress()
+        {
+            _translateOverlay.DisplayProgress();
+        }
 
         public void Dispose()
         {

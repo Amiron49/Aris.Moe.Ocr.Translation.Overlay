@@ -94,7 +94,7 @@ namespace Aris.Moe.Overlay
             foreach (var resource in _ownedResources) resource.Dispose();
         }
 
-        private string GetTextFilePath()
+        private static string GetTextFilePath()
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Fonts", "NotoSansJP-Medium.otf");
 

@@ -15,6 +15,9 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
         public bool DebugCapturedImage { get; set; } = false;
         public string CacheFolderRoot { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, ".cache");
 
+        public string OcrProvider { get; set; } = "Tesseract";
+        public string TranslationProvider { get; set; } = "Google";
+
         public GoogleConfiguration Google { get; set; }
         public LoggingConfiguration Logging { get; set; }
     }

@@ -13,5 +13,13 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Ocr
 
             return aCopy.IntersectsWith(bCopy);
         }
+        
+        public static double RelativeSizeTo(this Rectangle a, Rectangle b)
+        {
+            var aArea = a.Height * a.Width;
+            var bArea = b.Height * b.Width;
+
+            return (double)aArea / bArea;
+        }
     }
 }

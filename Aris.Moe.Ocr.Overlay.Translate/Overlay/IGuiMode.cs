@@ -1,7 +1,11 @@
-﻿namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
+﻿using System;
+
+namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
 {
-    internal interface IGuiMode
+    public interface IGuiMode
     {
+        bool ShouldRender { get; }
+        event EventHandler? OnWantsToRender;
         void Render();
     }
 }

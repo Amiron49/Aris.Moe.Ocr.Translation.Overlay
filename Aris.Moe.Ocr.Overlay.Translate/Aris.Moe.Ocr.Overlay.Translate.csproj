@@ -12,9 +12,21 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Alturos.Yolo" Version="3.0.6-alpha" />
       <PackageReference Include="Google.Cloud.Translate.V3" Version="2.0.0" />
       <PackageReference Include="Google.Cloud.Vision.V1" Version="2.0.0" />
       <PackageReference Include="Lamar" Version="4.3.1" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
+      <PackageReference Include="Tesseract" Version="4.1.0-beta1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="tessdata\jpn.traineddata">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="tessdata\jpn_vert.traineddata">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

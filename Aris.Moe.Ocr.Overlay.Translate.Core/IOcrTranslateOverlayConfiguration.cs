@@ -16,5 +16,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
         bool PermanentlyCacheExternalTranslateResult { get; set; }
         bool DebugCapturedImage { get; set; }
         string CacheFolderRoot { get; set; }
+        string OcrProvider { get; set; }
+        string TranslationProvider { get; set; }
     }
 }
