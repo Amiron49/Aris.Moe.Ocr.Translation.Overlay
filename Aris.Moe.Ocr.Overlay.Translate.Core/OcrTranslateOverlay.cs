@@ -68,7 +68,11 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
         {
             var recognizedTextboxes = await OcrScreenInternal();
 
-            foreach (var spatialText in recognizedTextboxes)
+            var correctedForCaptureArea = recognizedTextboxes.Select(CorrectForCaptureArea).ToList();
+            
+            _internalOverlay.ClearAll();
+            
+            foreach (var spatialText in correctedForCaptureArea)
                 _internalOverlay.Add(spatialText);
 
             ShowOverlay();
@@ -151,18 +155,17 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
 
         public void AskForTargetResize()
         {
-            _internalOverlay.AskForResize(_ocrTranslateOverlayConfiguration.CaptureArea, rectangle =>
-            {
-                if (rectangle == null)
-                    return;
-
-                _ocrTranslateOverlayConfiguration.CaptureArea = rectangle.Value;
-            });
+            // _internalOverlay.DisplayProgress(_ocrTranslateOverlayConfiguration.CaptureArea, rectangle =>
+            // {
+            //     if (rectangle == null)
+            //         return;
+            //
+            //     _ocrTranslateOverlayConfiguration.CaptureArea = rectangle.Value;
+            // });
         }
 
         public void Dispose()
         {
-            _internalOverlay.Dispose();
         }
     }
 }

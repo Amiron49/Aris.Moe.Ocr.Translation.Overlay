@@ -37,6 +37,15 @@ ScrollablePage {
                     model.askForTargetResize()
                 }
             }
+            
+            Button {
+                text: 'OCR only'
+                 onClicked: {
+                    var task = model.ocrScreen()
+                    Net.await(task, function() {
+                    })
+                }
+            }
         
             ControlsModel {
                 id: model

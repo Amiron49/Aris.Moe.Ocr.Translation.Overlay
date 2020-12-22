@@ -10,9 +10,9 @@ namespace Aris.Moe.Ocr.Overlay.Translate.DependencyInjection
         public OverlayTranslateRegistry()
         {
             For<ITranslate>().Use<GoogleTranslate>();
-            For<IOcr>().Use<GoogleOcr>();
+            For<IOcr>().Use<TesseractOcr>();
             For<INeedConfiguration>().Add<GoogleTranslate>();
-            For<INeedConfiguration>().Add<GoogleOcr>();
+            //For<INeedConfiguration>().Add<GoogleOcr>();
 
             For<IOcrTranslateOverlay>().Use<OcrTranslateOverlay>().Singleton();
             For<IScreenImageProvider>().Use<ScreenProvider>();

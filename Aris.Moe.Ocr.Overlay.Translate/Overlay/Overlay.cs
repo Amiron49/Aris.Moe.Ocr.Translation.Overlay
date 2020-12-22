@@ -81,19 +81,24 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
                 ShowOverlay();
         }
 
-        public void AskForResize(Rectangle current, Action<Rectangle?> resultCallback)
+        public void DisplayProgress(Rectangle current, Action<Rectangle?> resultCallback)
         {
             _currentMode = OverlayMode.ResizeTargetOverlay;
 
             SetClickAbility(true);
             ShowOverlay();
 
-            _resizeOverlay.AskForResize(current, resultRectangle =>
+            _resizeOverlay.DisplayProgress(current, resultRectangle =>
             {
                 _currentMode = OverlayMode.TextOverlay;
                 SetClickAbility(false);
                 resultCallback(resultRectangle);
             });
+        }
+
+        public void AskForResize(Rectangle current, Action<Rectangle?> resultCallback)
+        {
+            throw new NotImplementedException();
         }
     }
 }
