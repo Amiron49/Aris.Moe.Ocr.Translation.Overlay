@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Aris.Moe.Ocr.Overlay.Translate.Core
 {
-    public interface IOverlay : ITextOverlay, ITargetAreaResizeOverlay, IDisposable
+    public interface IOverlay : ITextOverlay, ITargetAreaResizeOverlay, IProgressOverlay , IDisposable
     {
         public bool Ready { get; }
         public void HideOverlay();

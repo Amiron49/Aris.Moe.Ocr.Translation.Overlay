@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Aris.Moe.Ocr.Overlay.Translate.Core;
 using Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes;
@@ -22,6 +23,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
         private readonly TextOverlay _textOverlay;
 
         private readonly TargetAreaResizeOverlay _resizeOverlay;
+        private readonly ProgressOverlay _progressOverlay;
 
         private OverlayMode _currentMode = OverlayMode.TextOverlay;
 
@@ -29,6 +31,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
         {
             _textOverlay = new TextOverlay();
             _resizeOverlay = new TargetAreaResizeOverlay(screenInformation, logger);
+            _progressOverlay = new ProgressOverlay(screenInformation, logger);
         }
 
         public async Task Init()
@@ -38,6 +41,8 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
 
         protected override void Render()
         {
+            _progressOverlay.Render();
+            
             switch (_currentMode)
             {
                 case OverlayMode.TextOverlay:
@@ -81,24 +86,26 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
                 ShowOverlay();
         }
 
-        public void DisplayProgress(Rectangle current, Action<Rectangle?> resultCallback)
+        public void DisplayProgress(string description, CancellationTokenSource cancellationTokenSource, ProgressStep step, params ProgressStep[] moreSteps)
+        {
+            ShowOverlay();
+
+            _progressOverlay.DisplayProgress(description, cancellationTokenSource, step, moreSteps);
+        }
+
+        public void AskForResize(Rectangle current, Action<Rectangle?> resultCallback)
         {
             _currentMode = OverlayMode.ResizeTargetOverlay;
 
             SetClickAbility(true);
             ShowOverlay();
 
-            _resizeOverlay.DisplayProgress(current, resultRectangle =>
+            _resizeOverlay.AskForResize(current, resultRectangle =>
             {
                 _currentMode = OverlayMode.TextOverlay;
                 SetClickAbility(false);
                 resultCallback(resultRectangle);
             });
-        }
-
-        public void AskForResize(Rectangle current, Action<Rectangle?> resultCallback)
-        {
-            throw new NotImplementedException();
         }
     }
 }

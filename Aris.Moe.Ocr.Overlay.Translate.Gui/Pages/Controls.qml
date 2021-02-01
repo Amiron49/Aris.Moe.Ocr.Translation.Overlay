@@ -46,6 +46,13 @@ ScrollablePage {
                     })
                 }
             }
+            
+            Button {
+                text: 'Progress'
+                 onClicked: {
+                    var task = model.displayProgress()
+                }
+            }
         
             ControlsModel {
                 id: model

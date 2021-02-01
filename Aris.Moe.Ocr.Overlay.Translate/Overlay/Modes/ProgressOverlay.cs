@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
@@ -9,12 +8,13 @@ using Aris.Moe.Ocr.Overlay.Translate.Core;
 using Aris.Moe.ScreenHelpers;
 using ImGuiNET;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
 {
     public class ProgressOverlay : IProgressOverlay, IGuiMode
     {
+        private readonly ILogger _logger;
+
         private const ImGuiWindowFlags NoDecoration = ImGuiWindowFlags.NoDecoration |
                                                       ImGuiWindowFlags.NoMove |
                                                       ImGuiWindowFlags.NoNav |
@@ -23,31 +23,49 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
                                                       ImGuiWindowFlags.NoResize |
                                                       ImGuiWindowFlags.NoInputs;
 
-        private readonly IScreenInformation _screenInformation;
 
-        public ProgressOverlay(IScreenInformation screenInformation)
+        private const int TotalWidth = 300;
+        private const int TotalHeight = 200;
+        private const int ProgressbarWidth = (int) (TotalWidth - Margin * 2);
+        private const float ProgressbarHeight = 10f;
+        private const float Margin = 16f;
+        private readonly int _xOffset;
+        private readonly int _yOffset;
+        
+        public ProgressOverlay(IScreenInformation screenInformation, ILogger logger)
         {
-            _screenInformation = screenInformation;
+            _logger = logger;
+            _xOffset = 0;
+            _yOffset = screenInformation.ScreenArea.Height - TotalHeight;
         }
 
         public void DisplayProgress(string description, CancellationTokenSource cancellationTokenSource, ProgressStep step, params ProgressStep[] moreSteps)
         {
-            //todo support queuing them
             var progressOperation = new ProgressOperation(description, cancellationTokenSource, new[] {step}.Concat(moreSteps));
+
+            progressOperation.OnFinished += (sender, args) =>
+            {
+                _logger.LogInformation("Done with step");
+            };
             
-            progressOperation.OnFinished += (sender, args) => _progressOperation.
-            
-            _progressOperation = progressOperation;
+            _progressOperationQueue.Enqueue(progressOperation);
         }
 
-        private volatile ConcurrentStack<ProgressOperation> _progressOperation = new ConcurrentStack<ProgressOperation>();
+        private volatile ConcurrentQueue<ProgressOperation> _progressOperationQueue = new ConcurrentQueue<ProgressOperation>();
+        private ProgressOperation? _currentProgressOperation;
+
 
         public void Render()
         {
-            if (_progressOperation == null || _progressOperation.Done || _progressOperation.Cancelled)
-                return;
+            if (_currentProgressOperation == null || _currentProgressOperation.Done || _currentProgressOperation.Cancelled)
+            {
+                if (!_progressOperationQueue.Any())
+                    return;
 
-            var pair = _progressOperation.Current;
+                _progressOperationQueue.TryDequeue(out _currentProgressOperation);
+            }
+
+            var pair = _currentProgressOperation.Current;
 
             if (pair == null)
                 return;
@@ -64,9 +82,11 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
                 ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.8f);
 
                 ImGui.Text(currentStep.StepDescription);
-                ImGui.Text($"{index}/{_progressOperation.Steps.Count}");
-                ImGui.GetWindowDrawList().AddRect(new Vector2(0, 0), new Vector2(30, 30), ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.4f, 1.0f, 1.0f)));
-                ImGui.GetWindowDrawList().AddRectFilled(new Vector2(0, 0), new Vector2(15, 15), ImGui.ColorConvertFloat4ToU32(new Vector4(0.6f, 0.2f, 1.0f, 1.0f)));
+                ImGui.Text($"{index}/{_currentProgressOperation.Steps.Count}");
+                var currentStepProgressPercentage = currentStep.ProgressPercentage * 100;
+                ImGui.Text($"{currentStepProgressPercentage:F}%");
+
+                ProgressBar(currentStep);
 
                 ImGui.End();
                 ImGui.PopStyleColor();
@@ -76,8 +96,9 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
 
         private void RenderBackdrop(Action inner)
         {
-            ImGui.SetNextWindowSize(new Vector2(500, 300));
-            ImGui.SetNextWindowPos(new Vector2(_screenInformation.ScreenArea.Width / 2, _screenInformation.ScreenArea.Height / 2));
+            ImGui.SetNextWindowSize(new Vector2(TotalWidth, TotalHeight));
+            
+            ImGui.SetNextWindowPos(new Vector2(_xOffset, _yOffset));
             ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.6f);
 
             ImGui.Begin("ProgressBackground", NoDecoration);
@@ -87,9 +108,19 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
             ImGui.End();
         }
 
-        public void DisplayProgress(Rectangle current, Action<Rectangle?> resultCallback)
-        {
-            throw new NotImplementedException();
+        private void ProgressBar(ProgressStep currentStep)
+        {   
+            var yProgressBar = _yOffset + 32f * 4;
+            var xProgressBar = _xOffset + Margin;
+
+            var upperLeft = new Vector2(xProgressBar, yProgressBar);
+            var lowerRightY = yProgressBar + ProgressbarHeight;
+            
+            var lowerRightOutline = new Vector2(xProgressBar + ProgressbarWidth, lowerRightY);
+            var lowerRightFilled = new Vector2((float) (xProgressBar + ProgressbarWidth * currentStep.ProgressPercentage), lowerRightY);
+            
+            ImGui.GetWindowDrawList().AddRect(upperLeft, lowerRightOutline, ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.4f, 1.0f, 1.0f)));
+            ImGui.GetWindowDrawList().AddRectFilled(upperLeft, lowerRightFilled, ImGui.ColorConvertFloat4ToU32(new Vector4(0.6f, 0.2f, 1.0f, 1.0f)));
         }
     }
 

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -155,13 +156,41 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
 
         public void AskForTargetResize()
         {
-            // _internalOverlay.DisplayProgress(_ocrTranslateOverlayConfiguration.CaptureArea, rectangle =>
-            // {
-            //     if (rectangle == null)
-            //         return;
-            //
-            //     _ocrTranslateOverlayConfiguration.CaptureArea = rectangle.Value;
-            // });
+            _internalOverlay.AskForResize(_ocrTranslateOverlayConfiguration.CaptureArea, rectangle =>
+            {
+                if (rectangle == null)
+                    return;
+            
+                _ocrTranslateOverlayConfiguration.CaptureArea = rectangle.Value;
+            });
+        }
+
+        private double progressCount = 0;
+        private System.Timers.Timer timer;
+        
+        public void DisplayProgress()
+        {
+            progressCount = 0;
+            Progress<double> progress = new Progress<double>();
+
+            timer = new System.Timers.Timer(1000);
+
+            timer.Elapsed += (sender, args) =>
+            {
+                progressCount += 0.1d;
+                ((IProgress<double>)progress).Report(progressCount);
+                if (progressCount >= 1) 
+                {
+                    timer.Stop();
+                    timer.Dispose();
+                }
+            };
+            timer.AutoReset = true;
+            timer.Enabled = true;
+            timer.Start();
+            
+            var cancellationTokenSource = new CancellationTokenSource();
+            _internalOverlay.DisplayProgress("lel", cancellationTokenSource, new ProgressStep("lel step", progress));
         }
 
         public void Dispose()
