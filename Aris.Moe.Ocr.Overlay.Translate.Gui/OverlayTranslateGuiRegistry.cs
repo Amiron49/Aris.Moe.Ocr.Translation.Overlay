@@ -25,6 +25,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
 
             For<IOcrTranslateOverlayConfiguration>().Use(configuration).Singleton();
             For<IGoogleConfiguration>().Use(configuration.Google).Singleton();
+            For<IGoogleConfiguration>().Use(configuration.Google).Singleton();
         }
         
         private static ILogger CreateLogger(ILoggingConfiguration configuration) {

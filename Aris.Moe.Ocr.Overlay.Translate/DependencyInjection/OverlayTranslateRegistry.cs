@@ -1,5 +1,6 @@
 ﻿using Aris.Moe.Ocr.Overlay.Translate.Core;
 using Aris.Moe.Ocr.Overlay.Translate.Ocr;
+using Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes;
 using Aris.Moe.ScreenHelpers;
 using Lamar;
 
@@ -22,6 +23,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.DependencyInjection
             For<ISpatialTextConsolidator>().Use<VerticalTextConsolidator>();
             For<IOcr>().DecorateAllWith<OcrDebugCache>();
             For<ITranslate>().DecorateAllWith<TranslateDebugCache>();
+            Use<ProgressOverlay>().Singleton().For<IProgressOverlay>().For<IProgressOverlayGuiMode>();
         }
     }
 }

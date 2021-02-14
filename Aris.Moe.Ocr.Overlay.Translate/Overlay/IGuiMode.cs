@@ -1,6 +1,6 @@
 ﻿namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
 {
-    internal interface IGuiMode
+    public interface IGuiMode
     {
         void Render();
     }

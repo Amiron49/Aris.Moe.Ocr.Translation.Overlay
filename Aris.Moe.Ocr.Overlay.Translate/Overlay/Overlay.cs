@@ -23,15 +23,15 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
         private readonly TextOverlay _textOverlay;
 
         private readonly TargetAreaResizeOverlay _resizeOverlay;
-        private readonly ProgressOverlay _progressOverlay;
+        private readonly IProgressOverlayGuiMode _progressOverlay;
 
         private OverlayMode _currentMode = OverlayMode.TextOverlay;
 
-        public Overlay(IScreenInformation screenInformation, ILogger<TargetAreaResizeOverlay> logger) : base(screenInformation)
+        public Overlay(IScreenInformation screenInformation, ILogger<TargetAreaResizeOverlay> logger, IProgressOverlayGuiMode progressOverlay) : base(screenInformation)
         {
             _textOverlay = new TextOverlay();
             _resizeOverlay = new TargetAreaResizeOverlay(screenInformation, logger);
-            _progressOverlay = new ProgressOverlay(screenInformation, logger);
+            _progressOverlay = progressOverlay;
         }
 
         public async Task Init()

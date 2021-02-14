@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,7 +30,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Core
         void DisplayProgress(string description, CancellationTokenSource cancellationTokenSource, ProgressStep step, params ProgressStep[] moreSteps);
     }
     
-    
+
     public class ProgressStep    
     {
         public string StepDescription { get; }

@@ -11,7 +11,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
 {
-    public class ProgressOverlay : IProgressOverlay, IGuiMode
+    public interface IProgressOverlayGuiMode : IProgressOverlay, IGuiMode
+    {
+        void DisplayProgress(string description, CancellationTokenSource cancellationTokenSource, ProgressStep step, params ProgressStep[] moreSteps);
+    }
+
+    public class ProgressOverlay : IProgressOverlayGuiMode
     {
         private readonly ILogger _logger;
 
@@ -31,7 +36,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
         private const float Margin = 16f;
         private readonly int _xOffset;
         private readonly int _yOffset;
-        
+
         public ProgressOverlay(IScreenInformation screenInformation, ILogger logger)
         {
             _logger = logger;
@@ -43,11 +48,8 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
         {
             var progressOperation = new ProgressOperation(description, cancellationTokenSource, new[] {step}.Concat(moreSteps));
 
-            progressOperation.OnFinished += (sender, args) =>
-            {
-                _logger.LogInformation("Done with step");
-            };
-            
+            progressOperation.OnFinished += (sender, args) => { _logger.LogInformation("Done with step"); };
+
             _progressOperationQueue.Enqueue(progressOperation);
         }
 
@@ -97,7 +99,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
         private void RenderBackdrop(Action inner)
         {
             ImGui.SetNextWindowSize(new Vector2(TotalWidth, TotalHeight));
-            
+
             ImGui.SetNextWindowPos(new Vector2(_xOffset, _yOffset));
             ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.6f);
 
@@ -109,16 +111,16 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
         }
 
         private void ProgressBar(ProgressStep currentStep)
-        {   
+        {
             var yProgressBar = _yOffset + 32f * 4;
             var xProgressBar = _xOffset + Margin;
 
             var upperLeft = new Vector2(xProgressBar, yProgressBar);
             var lowerRightY = yProgressBar + ProgressbarHeight;
-            
+
             var lowerRightOutline = new Vector2(xProgressBar + ProgressbarWidth, lowerRightY);
             var lowerRightFilled = new Vector2((float) (xProgressBar + ProgressbarWidth * currentStep.ProgressPercentage), lowerRightY);
-            
+
             ImGui.GetWindowDrawList().AddRect(upperLeft, lowerRightOutline, ImGui.ColorConvertFloat4ToU32(new Vector4(0.2f, 0.4f, 1.0f, 1.0f)));
             ImGui.GetWindowDrawList().AddRectFilled(upperLeft, lowerRightFilled, ImGui.ColorConvertFloat4ToU32(new Vector4(0.6f, 0.2f, 1.0f, 1.0f)));
         }
