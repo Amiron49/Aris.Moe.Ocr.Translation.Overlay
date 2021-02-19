@@ -12,12 +12,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Alturos.Yolo" Version="3.0.6-alpha" />
+      <PackageReference Include="DeepL" Version="0.1.0" />
       <PackageReference Include="Google.Cloud.Translate.V3" Version="2.0.0" />
       <PackageReference Include="Google.Cloud.Vision.V1" Version="2.0.0" />
       <PackageReference Include="Lamar" Version="4.3.1" />
       <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
       <PackageReference Include="Tesseract" Version="4.1.0-beta1" />
+      <PackageReference Include="Yolo.Net" Version="3.0.6-alpha.2" />
     </ItemGroup>
 
     <ItemGroup>

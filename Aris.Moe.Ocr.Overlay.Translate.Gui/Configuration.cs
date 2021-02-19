@@ -16,9 +16,10 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
         public string CacheFolderRoot { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, ".cache");
 
         public string OcrProvider { get; set; } = "Tesseract";
-        public string TranslationProvider { get; set; } = "Google";
+        public string TranslationProvider { get; set; } = "Deepl";
 
         public GoogleConfiguration Google { get; set; }
+        public DeeplConfiguration Deepl { get; set; }
         public LoggingConfiguration Logging { get; set; }
     }
 
@@ -41,5 +42,11 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
         public bool Verbose { get; set; }
         public bool DebugLogging { get; set; }
         public bool FileLogging { get; set; }
+    }
+    
+    public class DeeplConfiguration : IDeeplConfiguration
+    {
+        public string? ApiKey { get; set; }
+        public bool UseFreeProxy { get; set; } = false;
     }
 }

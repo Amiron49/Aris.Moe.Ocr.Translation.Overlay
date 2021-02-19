@@ -54,7 +54,8 @@ namespace Aris.Moe.Ocr.Overlay.Translate
             return asTranslations;
         }
 
-        private async Task<RepeatedField<Google.Cloud.Translate.V3.Translation>> TranslateWithGoogle(IEnumerable<ISpatialText> spatialTexts, string? targetLanguage, string? inputLanguage)
+        private async Task<RepeatedField<Google.Cloud.Translate.V3.Translation>> TranslateWithGoogle(IEnumerable<ISpatialText> spatialTexts, string? targetLanguage,
+            string? inputLanguage)
         {
             var untranslatedTexts = spatialTexts.Select(x => x.Text).ToList();
 
@@ -82,15 +83,17 @@ namespace Aris.Moe.Ocr.Overlay.Translate
         }
 
         public string Name { get; } = "Google-Translate-V3";
+
         public IEnumerable<string> GetConfigurationIssues()
         {
             if (string.IsNullOrEmpty(_googleConfiguration.KeyPath))
                 yield return $"'{nameof(IGoogleConfiguration.KeyPath)}': is not set. A private key enabled to access the V3Translation Api is needed";
             else if (!File.Exists(_googleConfiguration.KeyPath))
                 yield return $"Couldn't find google key file @ {_googleConfiguration.KeyPath}. A private key enabled to access the V3Translation Api is needed";
-            
+
             if (string.IsNullOrEmpty(_googleConfiguration.LocationId))
-                yield return $"'{nameof(IGoogleConfiguration.ProjectId)}': is not set. Your own google cloud projectId must be given for it to work. Also the TranslateV3 Api must be enabled for that project";
+                yield return
+                    $"'{nameof(IGoogleConfiguration.ProjectId)}': is not set. Your own google cloud projectId must be given for it to work. Also the TranslateV3 Api must be enabled for that project";
         }
     }
 }

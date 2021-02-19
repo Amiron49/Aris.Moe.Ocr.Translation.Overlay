@@ -1,14 +1,18 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Alturos.Yolo;
+using Alturos.Yolo.Model;
 using Aris.Moe.Ocr.Overlay.Translate.Core;
 using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
 
 namespace Aris.Moe.Ocr.Overlay.Translate.Ocr
 {

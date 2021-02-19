@@ -20,12 +20,13 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
             
             IncludeRegistry<OverlayTranslateRegistry>();
             For<IOcr>().Use<OcrMediator>();
+            For<ITranslate>().Use<TranslationMediator>();
             
             this.AddLogging(builder => builder.AddSerilog(logger));
 
             For<IOcrTranslateOverlayConfiguration>().Use(configuration).Singleton();
             For<IGoogleConfiguration>().Use(configuration.Google).Singleton();
-            For<IGoogleConfiguration>().Use(configuration.Google).Singleton();
+            For<IDeeplConfiguration>().Use(configuration.Deepl).Singleton();
         }
         
         private static ILogger CreateLogger(ILoggingConfiguration configuration) {
@@ -70,6 +71,31 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Gui
                 "Google" => _googleOcr.Value.Ocr(image, inputLanguage),
                 "Tesseract" => _tesseractOcr.Value.Ocr(image, inputLanguage),
                 _ => throw new Exception($"{_ocrTranslateOverlayConfiguration.OcrProvider} is not a known provider")
+            };
+        }
+    }
+    
+    public class TranslationMediator: ITranslate
+    {
+        private readonly IOcrTranslateOverlayConfiguration _ocrTranslateOverlayConfiguration;
+        private readonly Lazy<GoogleTranslate> _googleTranslate;
+        private readonly Lazy<DeeplTranslate> _deeplTranslate;
+
+        public TranslationMediator(IOcrTranslateOverlayConfiguration ocrTranslateOverlayConfiguration, Lazy<GoogleTranslate> googleTranslate, Lazy<DeeplTranslate> deeplTranslate)
+        {
+            _ocrTranslateOverlayConfiguration = ocrTranslateOverlayConfiguration;
+            _googleTranslate = googleTranslate;
+            _deeplTranslate = deeplTranslate;
+        }
+        
+
+        public Task<IEnumerable<Translation>> Translate(IEnumerable<ISpatialText> spatialTexts, string? targetLanguage = "en", string? inputLanguage = null)
+        {
+            return _ocrTranslateOverlayConfiguration.TranslationProvider switch
+            {
+                "Google" => _googleTranslate.Value.Translate(spatialTexts, targetLanguage, inputLanguage),
+                "Deepl" => _deeplTranslate.Value.Translate(spatialTexts, targetLanguage, inputLanguage),
+                _ => throw new Exception($"{_ocrTranslateOverlayConfiguration.TranslationProvider} is not a known provider")
             };
         }
     }
