@@ -11,6 +11,9 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
     {
         private volatile ConcurrentBag<ISpatialText> _activeTexts = new ConcurrentBag<ISpatialText>();
 
+        public bool ShouldRender { get; }
+        public event EventHandler? OnWantsToRender;
+
         public void Render()
         {
             foreach (var activeText in _activeTexts)
@@ -53,7 +56,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
 
         private static (Rectangle compensatedArea, float compensatedFontScale) CompensateForRender(ISpatialText text)
         {
-            const float defaultFontScale = 0.5f;
+            const float defaultFontScale = 0.4f;
             const int imGuiPadding = 8;
 
             var calculatedSize = ImGui.CalcTextSize(text.Text);

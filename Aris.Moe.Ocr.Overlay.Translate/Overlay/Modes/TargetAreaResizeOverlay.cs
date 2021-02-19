@@ -86,6 +86,9 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
 
         private ResizeOperation? _currentResizeOperation;
 
+        public bool ShouldRender { get; }
+        public event EventHandler? OnWantsToRender;
+
         public void Render()
         {
             if (_currentResizeOperation == null || _currentResizeOperation.OperationOver)

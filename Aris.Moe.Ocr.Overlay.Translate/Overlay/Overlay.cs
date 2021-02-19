@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Aris.Moe.Ocr.Overlay.Translate.Core;
 using Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes;
@@ -22,13 +23,20 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
         private readonly TextOverlay _textOverlay;
 
         private readonly TargetAreaResizeOverlay _resizeOverlay;
+        private readonly IProgressOverlayGuiMode _progressOverlay;
 
         private OverlayMode _currentMode = OverlayMode.TextOverlay;
 
-        public Overlay(IScreenInformation screenInformation, ILogger<TargetAreaResizeOverlay> logger) : base(screenInformation)
+        public Overlay(IScreenInformation screenInformation, ILogger<TargetAreaResizeOverlay> logger, IProgressOverlayGuiMode progressOverlay) : base(screenInformation)
         {
             _textOverlay = new TextOverlay();
             _resizeOverlay = new TargetAreaResizeOverlay(screenInformation, logger);
+            _progressOverlay = progressOverlay;
+
+            _progressOverlay.OnWantsToRender += (sender, args) =>
+            {
+                ShowOverlay();
+            };
         }
 
         public async Task Init()
@@ -38,6 +46,9 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
 
         protected override void Render()
         {
+            if (_progressOverlay.ShouldRender)
+                _progressOverlay.Render();
+
             switch (_currentMode)
             {
                 case OverlayMode.TextOverlay:
@@ -80,6 +91,13 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
             else
                 ShowOverlay();
         }
+
+        // public void DisplayProgress(string description, CancellationTokenSource cancellationTokenSource, ProgressStep step, params ProgressStep[] moreSteps)
+        // {
+        //     ShowOverlay();
+        //
+        //     _progressOverlay.DisplayProgress(description, cancellationTokenSource, step, moreSteps);
+        // }
 
         public void AskForResize(Rectangle current, Action<Rectangle?> resultCallback)
         {
