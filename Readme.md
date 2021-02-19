@@ -4,6 +4,8 @@ A program for translating any screen region through OCR and overlaying the trans
 > Please be aware that on the first startup the program downloads QT in the background. 
 > I have recently implemented a progress bar feature but haven't gotten yet around to feed the QT download progress into it.
 
+[Download of latest Version](https://github.com/Amiron49/Aris.Moe.Ocr.Translation.Overlay/releases/latest)
+
 [Example usage video](https://youtu.be/6CS_JHkEoxA)
 
 Also any kind of feedback/feature request is appreciated. 
