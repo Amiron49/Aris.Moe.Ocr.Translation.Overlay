@@ -7,13 +7,21 @@ EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Overlay", "Aris.Moe.Overlay\Aris.Moe.Overlay.csproj", "{D968365B-89B0-4884-AA35-9689D7B91138}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Ocr.Overlay.Translate.Core", "Aris.Moe.Ocr.Overlay.Translate.Core\Aris.Moe.Ocr.Overlay.Translate.Core.csproj", "{50596B4D-B546-496F-9BD3-47B5A465B967}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.OverlayTranslate.Core", "Aris.Moe.OverlayTranslate.Core\Aris.Moe.OverlayTranslate.Core.csproj", "{50596B4D-B546-496F-9BD3-47B5A465B967}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Ocr.Overlay.Translate", "Aris.Moe.Ocr.Overlay.Translate\Aris.Moe.Ocr.Overlay.Translate.csproj", "{69DD68D4-B256-4545-809D-8DA6A60929B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Ocr.Overlay.Translate.Gui", "Aris.Moe.Ocr.Overlay.Translate.Gui\Aris.Moe.Ocr.Overlay.Translate.Gui.csproj", "{579EBF3B-DD63-44E5-A6B9-93FA16657DD6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.OverlayTranslate.Gui", "Aris.Moe.OverlayTranslate.Gui\Aris.Moe.OverlayTranslate.Gui.csproj", "{579EBF3B-DD63-44E5-A6B9-93FA16657DD6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.ScreenHelpers", "Aris.Moe.ScreenHelpers\Aris.Moe.ScreenHelpers.csproj", "{2B524604-F29B-4411-BBF6-F6E232242C30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Ocr", "Aris.Moe.Ocr\Aris.Moe.Ocr.csproj", "{C11C92E4-D506-42D4-B61D-410A0640C47D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Translate", "Aris.Moe.Translate\Aris.Moe.Translate.csproj", "{4F652E8F-6404-463D-99FA-8AB29B5B9B0A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Configuration", "Aris.Moe.Configuration\Aris.Moe.Configuration.csproj", "{DA5AED83-D9E4-4456-B2A8-C1BDCBBF142B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Core", "Aris.Moe.Core\Aris.Moe.Core.csproj", "{2160D2AB-A4B5-4B85-A40F-01B08BF1FD00}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,5 +49,21 @@ Global
 		{2B524604-F29B-4411-BBF6-F6E232242C30}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B524604-F29B-4411-BBF6-F6E232242C30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B524604-F29B-4411-BBF6-F6E232242C30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C11C92E4-D506-42D4-B61D-410A0640C47D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C11C92E4-D506-42D4-B61D-410A0640C47D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C11C92E4-D506-42D4-B61D-410A0640C47D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C11C92E4-D506-42D4-B61D-410A0640C47D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F652E8F-6404-463D-99FA-8AB29B5B9B0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F652E8F-6404-463D-99FA-8AB29B5B9B0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F652E8F-6404-463D-99FA-8AB29B5B9B0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F652E8F-6404-463D-99FA-8AB29B5B9B0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA5AED83-D9E4-4456-B2A8-C1BDCBBF142B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA5AED83-D9E4-4456-B2A8-C1BDCBBF142B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA5AED83-D9E4-4456-B2A8-C1BDCBBF142B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA5AED83-D9E4-4456-B2A8-C1BDCBBF142B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2160D2AB-A4B5-4B85-A40F-01B08BF1FD00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2160D2AB-A4B5-4B85-A40F-01B08BF1FD00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2160D2AB-A4B5-4B85-A40F-01B08BF1FD00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2160D2AB-A4B5-4B85-A40F-01B08BF1FD00}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

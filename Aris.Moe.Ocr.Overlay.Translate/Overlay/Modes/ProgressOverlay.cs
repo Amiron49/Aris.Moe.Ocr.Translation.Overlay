@@ -4,21 +4,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
-using Aris.Moe.Ocr.Overlay.Translate.Core;
+using Aris.Moe.Core;
+using Aris.Moe.OverlayTranslate.Core;
 using Aris.Moe.ScreenHelpers;
 using ImGuiNET;
 using Microsoft.Extensions.Logging;
 
 namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
 {
-    public interface IProgressOverlayGuiMode : IProgressOverlay, IGuiMode
+    public interface IProgressDisplayGuiMode : IProgressDisplay, IGuiMode
     {
-        void DisplayProgress(string description, CancellationTokenSource cancellationTokenSource, ProgressStep step, params ProgressStep[] moreSteps);
     }
 
-    public class ProgressOverlay : IProgressOverlayGuiMode
+    public class ProgressDisplay : IProgressDisplayGuiMode
     {
-        private readonly ILogger<ProgressOverlay> _logger;
+        private readonly ILogger<ProgressDisplay> _logger;
 
         private const ImGuiWindowFlags NoDecoration = ImGuiWindowFlags.NoDecoration |
                                                       ImGuiWindowFlags.NoMove |
@@ -37,7 +37,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
         private readonly int _xOffset;
         private readonly int _yOffset;
 
-        public ProgressOverlay(IScreenInformation screenInformation, ILogger<ProgressOverlay> logger)
+        public ProgressDisplay(IScreenInformation screenInformation, ILogger<ProgressDisplay> logger)
         {
             _logger = logger;
             _xOffset = 0;

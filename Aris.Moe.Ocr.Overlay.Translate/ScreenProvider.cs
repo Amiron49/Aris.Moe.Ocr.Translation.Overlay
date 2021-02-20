@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using Aris.Moe.Ocr.Overlay.Translate.Core;
+using Aris.Moe.OverlayTranslate.Core;
 using Aris.Moe.ScreenHelpers;
 
 namespace Aris.Moe.Ocr.Overlay.Translate

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Numerics;
-using Aris.Moe.Ocr.Overlay.Translate.Core;
+using Aris.Moe.OverlayTranslate.Core;
 using Aris.Moe.ScreenHelpers;
 using ImGuiNET;
 using Microsoft.Extensions.Logging;
@@ -120,7 +120,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
             if (_currentResizeOperation == null || _currentResizeOperation.OperationOver)
                 return;
 
-            _logger.LogDebug(JsonConvert.SerializeObject(_currentResizeOperation));
+            //_logger.LogDebug(JsonConvert.SerializeObject(_currentResizeOperation));
 
             if (!_currentResizeOperation.CurrentlyDragging)
             {

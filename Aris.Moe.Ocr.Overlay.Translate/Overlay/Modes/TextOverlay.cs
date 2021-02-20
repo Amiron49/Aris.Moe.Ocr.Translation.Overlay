@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Drawing;
 using System.Numerics;
-using Aris.Moe.Ocr.Overlay.Translate.Core;
+using Aris.Moe.OverlayTranslate.Core;
 using ImGuiNET;
 
 namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
@@ -64,7 +64,8 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
             var areaHeight = Math.Abs(text.Area.Height);
             var areaWidth = Math.Abs(text.Area.Width);
 
-            var estimatedTextArea = calculatedSize.X * calculatedSize.Y * defaultFontScale;
+            var estimatedTextAreaAlternate = calculatedSize.X * calculatedSize.Y;
+            var estimatedTextArea = calculatedSize.X * calculatedSize.Y ;
             var additionalPaddingArea = areaWidth * imGuiPadding * 2 + areaHeight * imGuiPadding * 2 - imGuiPadding * imGuiPadding * 4;
 
 
@@ -77,7 +78,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
             {
                 var extraAreaFactor = availableArea / neededArea;
 
-                return (text.Area, extraAreaFactor * defaultFontScale);
+                return (text.Area, (float)Math.Sqrt(extraAreaFactor * 0.5));
             }
 
             var scaleFactor = Math.Sqrt(neededArea / availableArea);
@@ -87,7 +88,7 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
 
             var compensatedRectangle = Rectangle.Inflate(text.Area, (int) (missingWidth / 2), (int) (missingHeight / 2));
 
-            return (compensatedRectangle, defaultFontScale);
+            return (compensatedRectangle, 0.8f);
         }
 
         public void ClearAll()

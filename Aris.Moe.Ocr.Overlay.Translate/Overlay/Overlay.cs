@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Aris.Moe.Ocr.Overlay.Translate.Core;
+using Aris.Moe.OverlayTranslate.Core;
 using Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes;
 using Aris.Moe.Overlay;
 using Aris.Moe.ScreenHelpers;
@@ -23,17 +23,17 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
         private readonly TextOverlay _textOverlay;
 
         private readonly TargetAreaResizeOverlay _resizeOverlay;
-        private readonly IProgressOverlayGuiMode _progressOverlay;
+        private readonly IProgressDisplayGuiMode _progressDisplay;
 
         private OverlayMode _currentMode = OverlayMode.TextOverlay;
 
-        public Overlay(IScreenInformation screenInformation, ILogger<TargetAreaResizeOverlay> logger, IProgressOverlayGuiMode progressOverlay) : base(screenInformation)
+        public Overlay(IScreenInformation screenInformation, ILogger<TargetAreaResizeOverlay> logger, IProgressDisplayGuiMode progressDisplay) : base(screenInformation)
         {
             _textOverlay = new TextOverlay();
             _resizeOverlay = new TargetAreaResizeOverlay(screenInformation, logger);
-            _progressOverlay = progressOverlay;
+            _progressDisplay = progressDisplay;
 
-            _progressOverlay.OnWantsToRender += (sender, args) =>
+            _progressDisplay.OnWantsToRender += (sender, args) =>
             {
                 ShowOverlay();
             };
@@ -46,8 +46,8 @@ namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
 
         protected override void Render()
         {
-            if (_progressOverlay.ShouldRender)
-                _progressOverlay.Render();
+            if (_progressDisplay.ShouldRender)
+                _progressDisplay.Render();
 
             switch (_currentMode)
             {

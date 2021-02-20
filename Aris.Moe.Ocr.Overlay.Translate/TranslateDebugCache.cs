@@ -2,7 +2,8 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Aris.Moe.Ocr.Overlay.Translate.Core;
+using Aris.Moe.OverlayTranslate.Core;
+using Aris.Moe.Translate;
 using Newtonsoft.Json;
 
 namespace Aris.Moe.Ocr.Overlay.Translate
