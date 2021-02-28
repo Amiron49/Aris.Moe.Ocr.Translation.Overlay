@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{AD368D5C-994C-471B-BC23-7A2F8ED4A112}"
 ProjectSection(SolutionItems) = preProject
 	Readme.md = Readme.md
+	.gitignore = .gitignore
 EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Overlay", "Aris.Moe.Overlay\Aris.Moe.Overlay.csproj", "{D968365B-89B0-4884-AA35-9689D7B91138}"
