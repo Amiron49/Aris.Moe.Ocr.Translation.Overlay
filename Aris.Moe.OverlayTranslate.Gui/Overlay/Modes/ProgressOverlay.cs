@@ -5,12 +5,11 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using Aris.Moe.Core;
-using Aris.Moe.OverlayTranslate.Core;
 using Aris.Moe.ScreenHelpers;
 using ImGuiNET;
 using Microsoft.Extensions.Logging;
 
-namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
+namespace Aris.Moe.OverlayTranslate.Gui.Overlay.Modes
 {
     public interface IProgressDisplayGuiMode : IProgressDisplay, IGuiMode
     {

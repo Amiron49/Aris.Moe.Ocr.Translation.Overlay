@@ -2,10 +2,10 @@
 using System.Collections.Concurrent;
 using System.Drawing;
 using System.Numerics;
-using Aris.Moe.OverlayTranslate.Core;
+using Aris.Moe.Ocr;
 using ImGuiNET;
 
-namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
+namespace Aris.Moe.OverlayTranslate.Gui.Overlay.Modes
 {
     public class TextOverlay : ITextOverlay, IGuiMode
     {

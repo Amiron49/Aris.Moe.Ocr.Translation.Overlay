@@ -2,9 +2,8 @@
 using System.Text;
 using System.Threading.Tasks;
 using Aris.Moe.Configuration;
-using Aris.Moe.OverlayTranslate.Core;
 
-namespace Aris.Moe.OverlayTranslate.Gui
+namespace Aris.Moe.OverlayTranslate.Gui.Qt5
 {
     public class ControlsModel : IOcrTranslateOverlay
     {

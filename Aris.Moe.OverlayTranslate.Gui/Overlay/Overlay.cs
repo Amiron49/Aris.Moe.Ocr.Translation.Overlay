@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
-using Aris.Moe.OverlayTranslate.Core;
-using Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes;
+using Aris.Moe.Ocr;
 using Aris.Moe.Overlay;
+using Aris.Moe.OverlayTranslate.Gui.Overlay.Modes;
 using Aris.Moe.ScreenHelpers;
 using Microsoft.Extensions.Logging;
 using Rectangle = System.Drawing.Rectangle;
 
-namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
+namespace Aris.Moe.OverlayTranslate.Gui.Overlay
 {
     public class Overlay : ImGuiOverlay, IOverlay
     {

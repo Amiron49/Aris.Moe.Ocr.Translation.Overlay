@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Aris.Moe.OverlayTranslate.Gui
+namespace Aris.Moe.OverlayTranslate.Gui.Qt5
 {
     public class SettingsModel
     {

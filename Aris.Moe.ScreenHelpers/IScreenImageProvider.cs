@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.IO;
 
-namespace Aris.Moe.OverlayTranslate.Core
+namespace Aris.Moe.ScreenHelpers
 {
     public interface IScreenImageProvider
     {

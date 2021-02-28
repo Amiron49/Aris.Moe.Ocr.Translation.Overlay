@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace Aris.Moe.OverlayTranslate.Core
+namespace Aris.Moe.OverlayTranslate.Gui
 {
     public interface IOcrTranslateOverlayConfiguration
     {

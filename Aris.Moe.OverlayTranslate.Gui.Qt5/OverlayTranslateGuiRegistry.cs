@@ -4,35 +4,34 @@ using System.IO;
 using System.Threading.Tasks;
 using Aris.Moe.Configuration;
 using Aris.Moe.Ocr;
-using Aris.Moe.OverlayTranslate.Core;
-using Aris.Moe.Ocr.Overlay.Translate.DependencyInjection;
 using Aris.Moe.Translate;
 using Lamar;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using ILogger = Serilog.ILogger;
 
-namespace Aris.Moe.OverlayTranslate.Gui
+namespace Aris.Moe.OverlayTranslate.Gui.Qt5
 {
     public class OverlayTranslateGuiRegistry : ServiceRegistry
     {
         public OverlayTranslateGuiRegistry(Configuration configuration)
         {
             var logger = CreateLogger(configuration.Logging);
-            
+
             IncludeRegistry<OverlayTranslateRegistry>();
             For<IOcr>().Use<OcrMediator>();
             For<ITranslate>().Use<TranslationMediator>();
-            
+
             this.AddLogging(builder => builder.AddSerilog(logger));
 
             For<IOcrTranslateOverlayConfiguration>().Use(configuration).Singleton();
             For<IGoogleConfiguration>().Use(configuration.Google).Singleton();
             For<IDeeplConfiguration>().Use(configuration.Deepl).Singleton();
         }
-        
-        private static ILogger CreateLogger(ILoggingConfiguration configuration) {
-            var builder =  new LoggerConfiguration();
+
+        private static ILogger CreateLogger(ILoggingConfiguration configuration)
+        {
+            var builder = new LoggerConfiguration();
 
             if (configuration.Verbose)
                 builder = builder.MinimumLevel.Debug();
@@ -50,10 +49,9 @@ namespace Aris.Moe.OverlayTranslate.Gui
 
             return builder.CreateLogger();
         }
-        
     }
-    
-    public class OcrMediator: IOcr
+
+    public class OcrMediator : IOcr
     {
         private readonly IOcrTranslateOverlayConfiguration _ocrTranslateOverlayConfiguration;
         private readonly Lazy<GoogleOcr> _googleOcr;
@@ -65,7 +63,7 @@ namespace Aris.Moe.OverlayTranslate.Gui
             _googleOcr = googleOcr;
             _tesseractOcr = tesseractOcr;
         }
-        
+
         public Task<IEnumerable<ISpatialText>> Ocr(Stream image, string? inputLanguage = null)
         {
             return _ocrTranslateOverlayConfiguration.OcrProvider switch
@@ -76,8 +74,8 @@ namespace Aris.Moe.OverlayTranslate.Gui
             };
         }
     }
-    
-    public class TranslationMediator: ITranslate
+
+    public class TranslationMediator : ITranslate
     {
         private readonly IOcrTranslateOverlayConfiguration _ocrTranslateOverlayConfiguration;
         private readonly Lazy<GoogleTranslate> _googleTranslate;
@@ -89,14 +87,13 @@ namespace Aris.Moe.OverlayTranslate.Gui
             _googleTranslate = googleTranslate;
             _deeplTranslate = deeplTranslate;
         }
-        
 
-        public Task<IEnumerable<Translation>> Translate(IEnumerable<ISpatialText> spatialTexts, string? targetLanguage = "en", string? inputLanguage = null)
+        public Task<IEnumerable<Translation>> Translate(IEnumerable<string> originals, string? targetLanguage = "en", string? inputLanguage = null)
         {
             return _ocrTranslateOverlayConfiguration.TranslationProvider switch
             {
-                "Google" => _googleTranslate.Value.Translate(spatialTexts, targetLanguage, inputLanguage),
-                "Deepl" => _deeplTranslate.Value.Translate(spatialTexts, targetLanguage, inputLanguage),
+                "Google" => _googleTranslate.Value.Translate(originals, targetLanguage, inputLanguage),
+                "Deepl" => _deeplTranslate.Value.Translate(originals, targetLanguage, inputLanguage),
                 _ => throw new Exception($"{_ocrTranslateOverlayConfiguration.TranslationProvider} is not a known provider")
             };
         }

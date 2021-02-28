@@ -8,7 +8,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Aris.Moe.Configuration\Aris.Moe.Configuration.csproj" />
-	  <ProjectReference Include="..\Aris.Moe.Ocr\Aris.Moe.Ocr.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

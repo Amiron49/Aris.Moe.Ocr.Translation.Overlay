@@ -4,13 +4,13 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Aris.Moe.Ocr;
+using Aris.Moe.ScreenHelpers;
 using Aris.Moe.Translate;
 using Microsoft.Extensions.Logging;
 
-namespace Aris.Moe.OverlayTranslate.Core
+namespace Aris.Moe.OverlayTranslate.Gui
 {
     public class OcrTranslateOverlay : IOcrTranslateOverlay
     {
@@ -38,7 +38,7 @@ namespace Aris.Moe.OverlayTranslate.Core
 
         public async Task TranslateScreen()
         {
-            var recognizedTextboxes = await OcrScreenInternal();
+            var recognizedTextboxes = (await OcrScreenInternal()).ToList();
 
             var textBoxesCount = recognizedTextboxes.Count;
             _log.LogInformation("Found {Count} textboxes", textBoxesCount);
@@ -52,9 +52,10 @@ namespace Aris.Moe.OverlayTranslate.Core
             }
 
             _log.LogInformation("Translating the textboxes");
-            var translations = await _translate.Translate(recognizedTextboxes, _ocrTranslateOverlayConfiguration.TargetLanguage, _ocrTranslateOverlayConfiguration.SourceLanguage);
+            var originalTexts = recognizedTextboxes.Select(x => x.Text);
+            var translations = (await _translate.Translate(originalTexts, _ocrTranslateOverlayConfiguration.TargetLanguage, _ocrTranslateOverlayConfiguration.SourceLanguage)).ToList();
 
-            var asSpatialText = translations.Select(x => new SpatialText(x.Text, x.Area));
+            var asSpatialText = ToSpatialTexts(recognizedTextboxes, translations);
 
             var correctedForCaptureArea = asSpatialText.Select(CorrectForCaptureArea).ToList();
             
@@ -65,6 +66,17 @@ namespace Aris.Moe.OverlayTranslate.Core
 
             ShowOverlay();
             _log.LogInformation("Showing the complete translation");
+        }
+
+        private static IEnumerable<SpatialText> ToSpatialTexts(IList<ISpatialText> originals, IList<Translation> translations)
+        {
+            for (var i = 0; i < originals.Count; i++)
+            {
+                var original = originals[i];
+                var translation = translations[i];
+
+                yield return new SpatialText(translation.Text, original.Area);
+            }
         }
 
         public async Task OcrScreen()

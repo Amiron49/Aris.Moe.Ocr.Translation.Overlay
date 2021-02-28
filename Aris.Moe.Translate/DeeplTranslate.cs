@@ -2,10 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Aris.Moe.Configuration;
-using Aris.Moe.Ocr;
 using DeepL;
 using Microsoft.Extensions.Logging;
-using Translation = Aris.Moe.Translate.Translation;
 
 namespace Aris.Moe.Translate
 {
@@ -20,18 +18,18 @@ namespace Aris.Moe.Translate
             _client = new DeepLClient(deeplConfiguration.ApiKey);
         }
 
-        public Task<IEnumerable<Translation>> Translate(IEnumerable<ISpatialText> spatialTexts, string? targetLanguage = "en", string? inputLanguage = null)
+        public Task<IEnumerable<Translation>> Translate(IEnumerable<string> originals, string? targetLanguage = "en", string? inputLanguage = null)
         {
-            return TranslateInternal(spatialTexts.ToList(), targetLanguage, inputLanguage);
+            return TranslateInternal(originals.ToList(), targetLanguage, inputLanguage);
         }
 
-        private async Task<IEnumerable<Translation>> TranslateInternal(IList<ISpatialText> spatialTexts, string? targetLanguage = "en", string? inputLanguage = null)
+        private async Task<IEnumerable<Translation>> TranslateInternal(IList<string> originals, string? targetLanguage = "en", string? inputLanguage = null)
         {
-            var translated = (await _client.TranslateAsync(spatialTexts.Select(x => x.Text), inputLanguage?.ToUpperInvariant(), targetLanguage?.ToUpperInvariant())).ToList();
+            var translated = (await _client.TranslateAsync(originals, inputLanguage?.ToUpperInvariant(), targetLanguage?.ToUpperInvariant())).ToList();
 
-            if (translated.Count != spatialTexts.Count())
+            if (translated.Count != originals.Count())
             {
-                _logger.LogError($"ocr count ({spatialTexts.Count}) and translation count {translated.Count} mismatch");
+                _logger.LogError($"ocr count ({originals.Count}) and translation count {translated.Count} mismatch");
                 return new List<Translation>();
             }
 
@@ -40,9 +38,9 @@ namespace Aris.Moe.Translate
             for (var i = 0; i < translated.Count; i++)
             {
                 var translation = translated[i];
-                var spatial = spatialTexts[i];
+                var original = originals[i];
                 _logger.LogInformation(translation.Text);
-                result.Add(new Translation(translation.Text, spatial.Text.Length, spatial.Area));
+                result.Add(new Translation(translation.Text, original));
             }
 
             return result;

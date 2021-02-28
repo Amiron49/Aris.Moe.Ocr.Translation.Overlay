@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Drawing;
 using System.Numerics;
-using Aris.Moe.OverlayTranslate.Core;
 using Aris.Moe.ScreenHelpers;
 using ImGuiNET;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
-namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
+namespace Aris.Moe.OverlayTranslate.Gui.Overlay.Modes
 {
     public class TargetAreaResizeOverlay : ITargetAreaResizeOverlay, IGuiMode
     {

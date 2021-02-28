@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Aris.Moe.Core
-{
-}
-
-namespace Aris.Moe.OverlayTranslate.Core
+namespace Aris.Moe.OverlayTranslate.Gui
 {
     public interface IOverlay : ITextOverlay, ITargetAreaResizeOverlay , IDisposable
     {

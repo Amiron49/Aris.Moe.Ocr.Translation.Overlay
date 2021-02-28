@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Aris.Moe.OverlayTranslate.Core
+namespace Aris.Moe.OverlayTranslate.Gui
 {
     public interface IOcrTranslateOverlay : IDisposable
     {

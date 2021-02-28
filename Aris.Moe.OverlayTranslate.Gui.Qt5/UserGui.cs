@@ -1,7 +1,7 @@
 ﻿using Qml.Net;
 using Qml.Net.Runtimes;
 
-namespace Aris.Moe.OverlayTranslate.Gui
+namespace Aris.Moe.OverlayTranslate.Gui.Qt5
 {
     public class UserGui
     {
@@ -17,8 +17,8 @@ namespace Aris.Moe.OverlayTranslate.Gui
             using var engine = new QQmlApplicationEngine();
 
 
-            Qml.Net.Qml.RegisterType<SettingsModel>("Aris.Moe.OverlayTranslate.Gui", 1, 1);
-            Qml.Net.Qml.RegisterType<ControlsModel>("Aris.Moe.OverlayTranslate.Gui", 1, 1);
+            Qml.Net.Qml.RegisterType<SettingsModel>("Aris.Moe.OverlayTranslate.Gui.Qt5", 1, 1);
+            Qml.Net.Qml.RegisterType<ControlsModel>("Aris.Moe.OverlayTranslate.Gui.Qt5", 1, 1);
 
             engine.Load("Main.qml");
 

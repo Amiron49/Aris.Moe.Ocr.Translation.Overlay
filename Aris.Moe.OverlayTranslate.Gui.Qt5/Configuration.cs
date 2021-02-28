@@ -2,9 +2,8 @@
 using System.Drawing;
 using System.IO;
 using Aris.Moe.Configuration;
-using Aris.Moe.OverlayTranslate.Core;
 
-namespace Aris.Moe.OverlayTranslate.Gui
+namespace Aris.Moe.OverlayTranslate.Gui.Qt5
 {
     public class Configuration : IOcrTranslateOverlayConfiguration
     {

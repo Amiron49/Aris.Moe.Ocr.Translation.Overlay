@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Aris.Moe.Ocr.Overlay.Translate.Overlay
+namespace Aris.Moe.OverlayTranslate.Gui.Overlay
 {
     public interface IGuiMode
     {

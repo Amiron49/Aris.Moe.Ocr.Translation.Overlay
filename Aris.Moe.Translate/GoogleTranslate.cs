@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Aris.Moe.Configuration;
-using Aris.Moe.Ocr;
 using Google.Api.Gax.ResourceNames;
 using Google.Cloud.Translate.V3;
 using Google.Protobuf.Collections;
@@ -29,37 +28,35 @@ namespace Aris.Moe.Translate
             }.Build());
         }
 
-        public Task<IEnumerable<Translation>> Translate(IEnumerable<ISpatialText> spatialTexts, string? targetLanguage = "en", string? inputLanguage = null)
+        public Task<IEnumerable<Translation>> Translate(IEnumerable<string> originals, string? targetLanguage = "en", string? inputLanguage = null)
         {
-            return TranslateInternal(spatialTexts.ToList(), targetLanguage, inputLanguage);
+            return TranslateInternal(originals.ToList(), targetLanguage, inputLanguage);
         }
 
-        private async Task<IEnumerable<Translation>> TranslateInternal(IList<ISpatialText> spatialTexts, string? targetLanguage = "en", string? inputLanguage = null)
+        private async Task<IEnumerable<Translation>> TranslateInternal(IList<string> originals, string? targetLanguage = "en", string? inputLanguage = null)
         {
-            var googleTranslations = await TranslateWithGoogle(spatialTexts, targetLanguage, inputLanguage);
+            var googleTranslations = await TranslateWithGoogle(originals, targetLanguage, inputLanguage);
 
-            if (googleTranslations.Count != spatialTexts.Count())
+            if (googleTranslations.Count != originals.Count)
             {
-                _log.LogWarning($"ocr count ({spatialTexts.Count}) and translation count {googleTranslations.Count} mismatch");
+                _log.LogWarning($"ocr count ({originals.Count}) and translation count {googleTranslations.Count} mismatch");
                 return new Translation[0];
             }
 
-            var asTranslations = spatialTexts.Select((spatialText, i) =>
+            var asTranslations = originals.Select((originalText, i) =>
             {
                 var googleTranslation = googleTranslations[i];
 
-                return new Translation(googleTranslation.TranslatedText, spatialText.Text.Length, spatialText.Area);
+                return new Translation(googleTranslation.TranslatedText, originalText);
             });
 
             return asTranslations;
         }
 
-        private async Task<RepeatedField<Google.Cloud.Translate.V3.Translation>> TranslateWithGoogle(IEnumerable<ISpatialText> spatialTexts, string? targetLanguage,
+        private async Task<RepeatedField<Google.Cloud.Translate.V3.Translation>> TranslateWithGoogle(IList<string> originals, string? targetLanguage,
             string? inputLanguage)
         {
-            var untranslatedTexts = spatialTexts.Select(x => x.Text).ToList();
-
-            if (!untranslatedTexts.Any())
+            if (!originals.Any())
             {
                 _log.LogWarning("No texts given for translation");
                 return new RepeatedField<Google.Cloud.Translate.V3.Translation>();
@@ -69,7 +66,7 @@ namespace Aris.Moe.Translate
             {
                 Contents =
                 {
-                    untranslatedTexts
+                    originals
                 },
                 TargetLanguageCode = targetLanguage,
                 SourceLanguageCode = inputLanguage,

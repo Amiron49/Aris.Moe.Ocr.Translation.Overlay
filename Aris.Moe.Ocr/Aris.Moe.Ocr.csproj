@@ -20,4 +20,13 @@
 	  <ProjectReference Include="..\Aris.Moe.Core\Aris.Moe.Core.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<None Update="tessdata\jpn.traineddata">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="tessdata\jpn_vert.traineddata">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
 </Project>

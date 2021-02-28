@@ -17,16 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="tessdata\jpn.traineddata">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="tessdata\jpn_vert.traineddata">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Ocr" />
+      <Folder Include="DependencyInjection" />
     </ItemGroup>
 
 </Project>

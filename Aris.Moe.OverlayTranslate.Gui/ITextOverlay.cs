@@ -1,6 +1,6 @@
 ﻿using Aris.Moe.Ocr;
 
-namespace Aris.Moe.OverlayTranslate.Core
+namespace Aris.Moe.OverlayTranslate.Gui
 {
     public interface ITextOverlay
     {

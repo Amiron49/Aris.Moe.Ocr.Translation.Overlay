@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace Aris.Moe.Ocr.Overlay.Translate.Overlay.Modes
+namespace Aris.Moe.OverlayTranslate.Gui.Overlay.Modes
 {
     internal static class PointExtensions
     {

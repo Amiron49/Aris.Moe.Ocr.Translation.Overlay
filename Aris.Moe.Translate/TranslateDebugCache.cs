@@ -2,34 +2,32 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Aris.Moe.OverlayTranslate.Core;
-using Aris.Moe.Translate;
 using Newtonsoft.Json;
 
-namespace Aris.Moe.Ocr.Overlay.Translate
+namespace Aris.Moe.Translate
 {
     public class TranslateDebugCache : ITranslate
     {
         private readonly ITranslate _decorated;
-        private readonly IOcrTranslateOverlayConfiguration _configuration;
+        private readonly ITranslateConfig _configuration;
 
-        public TranslateDebugCache(ITranslate decorated, IOcrTranslateOverlayConfiguration configuration)
+        public TranslateDebugCache(ITranslate decorated, ITranslateConfig configuration)
         {
             _decorated = decorated;
             _configuration = configuration;
         }
 
-        public async Task<IEnumerable<Translation>> Translate(IEnumerable<ISpatialText> spatialTexts, string? targetLanguage = "en", string? inputLanguage = null)
+        public async Task<IEnumerable<Translation>> Translate(IEnumerable<string> originals, string? targetLanguage = "en", string? inputLanguage = null)
         {
-            if (!_configuration.PermanentlyCacheExternalOcrResult)
-                return await _decorated.Translate(spatialTexts, targetLanguage, inputLanguage);
+            if (!_configuration.Cache)
+                return await _decorated.Translate(originals, targetLanguage, inputLanguage);
 
             var cached = GetCached();
 
             if (cached != null) 
                 return cached;
             
-            cached = (await _decorated.Translate(spatialTexts, targetLanguage, inputLanguage)).ToList();
+            cached = (await _decorated.Translate(originals, targetLanguage, inputLanguage)).ToList();
             Cache(cached);
 
             return cached;

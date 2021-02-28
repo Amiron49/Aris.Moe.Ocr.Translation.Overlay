@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Aris.Moe.OverlayTranslate.Core;
+using Aris.Moe.Overlay;
 using Lamar;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 
-namespace Aris.Moe.OverlayTranslate.Gui
+namespace Aris.Moe.OverlayTranslate.Gui.Qt5
 {
     internal class Program
     {

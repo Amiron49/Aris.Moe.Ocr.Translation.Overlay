@@ -1,11 +1,8 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using Aris.Moe.OverlayTranslate.Core;
-using Aris.Moe.ScreenHelpers;
 
-namespace Aris.Moe.Ocr.Overlay.Translate
+namespace Aris.Moe.ScreenHelpers
 {
     public class ScreenProvider : IScreenImageProvider
     {

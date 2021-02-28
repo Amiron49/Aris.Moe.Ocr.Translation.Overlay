@@ -1,20 +1,17 @@
 ﻿using System.Drawing;
 
-#nullable enable
 namespace Aris.Moe.Translate
 {
     public class Translation
     {
-        public string Text { get; set; }
-        public int OriginalTextLength { get; set; }
+        public string Text { get; }
+        public string OriginalText { get; }
+        public int OriginalTextLength => OriginalText.Length;
 
-        public Rectangle Area { get; set; }
-
-        public Translation(string text, int originalTextLength, Rectangle area)
+        public Translation(string text, string originalText)
         {
             Text = text;
-            OriginalTextLength = originalTextLength;
-            Area = area;
+            OriginalText = originalText;
         }
     }
 }
