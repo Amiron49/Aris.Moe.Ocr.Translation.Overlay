@@ -8,9 +8,9 @@ using Lamar;
 
 namespace Aris.Moe.OverlayTranslate.Gui
 {
-    public class OverlayTranslateRegistry : ServiceRegistry
+    public class GuiRegistry : ServiceRegistry
     {
-        public OverlayTranslateRegistry()
+        public GuiRegistry()
         {
             For<ITranslate>().Use<GoogleTranslate>();
             For<IOcr>().Use<TesseractOcr>();

@@ -26,7 +26,7 @@ namespace Aris.Moe.Ocr
             }.Build());
         }
 
-        public async Task<IEnumerable<ISpatialText>> Ocr(Stream image, string? inputLanguage = null)
+        public async Task<(IEnumerable<ISpatialText> Texts, string Language)> Ocr(Stream image, string? inputLanguage = null)
         {
             var googleResult = await OcrFromGoogle(image, inputLanguage);
 
@@ -34,9 +34,11 @@ namespace Aris.Moe.Ocr
 
             var asSpatialTexts = singleCharacterAnnotations.Select(ConvertToSpatialText).ToList();
 
-            return asSpatialTexts;
+            var language = googleResult[0].Locale;
+            
+            return (asSpatialTexts, language);
         }
-
+        
         private async Task<IReadOnlyList<EntityAnnotation>> OcrFromGoogle(Stream image, string? inputLanguage = null)
         {
             image.Position = 0;

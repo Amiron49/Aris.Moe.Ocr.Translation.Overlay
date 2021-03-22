@@ -38,7 +38,7 @@ namespace Aris.Moe.Ocr
             _regionsOfInterestFinder = new RegionsOfInterestFinder(logger, progressOverlay);
         }
 
-        public async Task<IEnumerable<ISpatialText>> Ocr(Stream image, string? inputLanguage = null)
+        public async Task<(IEnumerable<ISpatialText> Texts, string Language)> Ocr(Stream image, string? inputLanguage = null)
         {
             using var engine = new TesseractEngine(@"./tessdata", MapLanguage(inputLanguage!), EngineMode.Default);
             engine.SetVariable("tessedit_write_images", true);
@@ -58,7 +58,7 @@ namespace Aris.Moe.Ocr
                 results.AddRange(ocrResult);
             }
 
-            return results;
+            return (results, inputLanguage);
         }
 
         private static string MapLanguage(string language)

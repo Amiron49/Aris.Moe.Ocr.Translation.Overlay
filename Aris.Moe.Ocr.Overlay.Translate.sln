@@ -22,9 +22,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Configuration", "A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Core", "Aris.Moe.Core\Aris.Moe.Core.csproj", "{2160D2AB-A4B5-4B85-A40F-01B08BF1FD00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.OverlayTranslate.Api", "Aris.Moe.OverlayTranslate.Api\Aris.Moe.OverlayTranslate.Api.csproj", "{1A11E1E1-B9FA-40AF-9B8A-CCDAB6D5F450}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.OverlayTranslate.Server.AspNetCore", "Aris.Moe.OverlayTranslate.Server.AspNetCore\Aris.Moe.OverlayTranslate.Server.AspNetCore.csproj", "{1A11E1E1-B9FA-40AF-9B8A-CCDAB6D5F450}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.OverlayTranslate.Gui", "Aris.Moe.OverlayTranslate.Gui\Aris.Moe.OverlayTranslate.Gui.csproj", "{8F8D88E6-5A60-43BA-BF2A-03D199969338}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.OverlayTranslate.Server", "Aris.Moe.OverlayTranslate.Server\Aris.Moe.OverlayTranslate.Server.csproj", "{C2A5BA19-E180-4001-8E6B-BC128575E99A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.OverlayTranslate.Server.DataAccess", "Aris.Moe.OverlayTranslate.Server.DataAccess\Aris.Moe.OverlayTranslate.Server.DataAccess.csproj", "{C6A14D2B-1DD3-4D88-9782-2B07F88ABB11}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite", "Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite\Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite.csproj", "{78AD074A-4297-46CF-AEB1-5F8C71A606F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.OverlayTranslate.Configuration", "Aris.Moe.OverlayTranslate.Configuration\Aris.Moe.OverlayTranslate.Configuration.csproj", "{6A7F1539-CC9C-4042-B37C-61C8487E8FBC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,5 +80,21 @@ Global
 		{8F8D88E6-5A60-43BA-BF2A-03D199969338}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F8D88E6-5A60-43BA-BF2A-03D199969338}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F8D88E6-5A60-43BA-BF2A-03D199969338}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2A5BA19-E180-4001-8E6B-BC128575E99A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2A5BA19-E180-4001-8E6B-BC128575E99A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2A5BA19-E180-4001-8E6B-BC128575E99A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2A5BA19-E180-4001-8E6B-BC128575E99A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6A14D2B-1DD3-4D88-9782-2B07F88ABB11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6A14D2B-1DD3-4D88-9782-2B07F88ABB11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6A14D2B-1DD3-4D88-9782-2B07F88ABB11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6A14D2B-1DD3-4D88-9782-2B07F88ABB11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78AD074A-4297-46CF-AEB1-5F8C71A606F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78AD074A-4297-46CF-AEB1-5F8C71A606F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78AD074A-4297-46CF-AEB1-5F8C71A606F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78AD074A-4297-46CF-AEB1-5F8C71A606F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A7F1539-CC9C-4042-B37C-61C8487E8FBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A7F1539-CC9C-4042-B37C-61C8487E8FBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A7F1539-CC9C-4042-B37C-61C8487E8FBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A7F1539-CC9C-4042-B37C-61C8487E8FBC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

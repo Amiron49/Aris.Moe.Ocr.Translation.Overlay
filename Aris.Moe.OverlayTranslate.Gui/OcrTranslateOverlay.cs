@@ -124,7 +124,7 @@ namespace Aris.Moe.OverlayTranslate.Gui
                     _log.LogInformation("Ocr-ing the image");
                     var recognizedTextboxes = await _ocr.Ocr(stream, _ocrTranslateOverlayConfiguration.SourceLanguage);
 
-                    return recognizedTextboxes.ToList();
+                    return recognizedTextboxes.Texts.ToList();
                 }
             }
         }

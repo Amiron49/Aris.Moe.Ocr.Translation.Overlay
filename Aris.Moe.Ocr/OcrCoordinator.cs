@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -18,16 +19,16 @@ namespace Aris.Moe.Ocr
             _logger = logger;
         }
 
-        public async Task<IEnumerable<ISpatialText>> Ocr(Stream image, string? inputLanguage = null)
+        public async Task<(IEnumerable<ISpatialText> Texts, string Language)> Ocr(Stream image, string? inputLanguage = null)
         {
             var googleOcrResult = await _decorated.Ocr(image, inputLanguage);
 
-            var consolidated = _spatialTextConsolidator.Consolidate(googleOcrResult);
+            var consolidated = (_spatialTextConsolidator.Consolidate(googleOcrResult.Texts)).ToList();
 
             foreach (var spatialText in consolidated)
                 _logger.LogInformation(spatialText.Text);
             
-            return consolidated;
+            return (consolidated, googleOcrResult.Language);
         }
     }
 }

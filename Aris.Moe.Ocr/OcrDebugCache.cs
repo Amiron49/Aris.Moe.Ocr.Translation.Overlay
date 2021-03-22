@@ -17,20 +17,20 @@ namespace Aris.Moe.Ocr
             _configuration = configuration;
         }
 
-        public async Task<IEnumerable<ISpatialText>> Ocr(Stream image, string? inputLanguage = null)
+        public async Task<(IEnumerable<ISpatialText> Texts, string Language)> Ocr(Stream image, string? inputLanguage = null)
         {
             if (!_configuration.Cache)
                 return await _decorated.Ocr(image, inputLanguage);
 
-            var result = GetCached();
+            var cached = GetCached();
 
-            if (result == null)
-            {
-                result = (await _decorated.Ocr(image, inputLanguage)).ToList();
-                Cache(result);
-            }
-
-            return result;
+            if (cached != null)
+                return (cached, "en");
+            
+            var newResult = (await _decorated.Ocr(image, inputLanguage));
+            Cache(newResult.Texts);
+            
+            return newResult;
         }
 
         private List<ISpatialText>? GetCached()

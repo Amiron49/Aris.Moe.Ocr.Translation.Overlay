@@ -18,7 +18,7 @@ namespace Aris.Moe.OverlayTranslate.Gui.Qt5
         {
             var logger = CreateLogger(configuration.Logging);
 
-            IncludeRegistry<OverlayTranslateRegistry>();
+            IncludeRegistry<GuiRegistry>();
             For<IOcr>().Use<OcrMediator>();
             For<ITranslate>().Use<TranslationMediator>();
 
@@ -64,7 +64,7 @@ namespace Aris.Moe.OverlayTranslate.Gui.Qt5
             _tesseractOcr = tesseractOcr;
         }
 
-        public Task<IEnumerable<ISpatialText>> Ocr(Stream image, string? inputLanguage = null)
+        public Task<(IEnumerable<ISpatialText> Texts, string Language)> Ocr(Stream image, string? inputLanguage = null)
         {
             return _ocrTranslateOverlayConfiguration.OcrProvider switch
             {

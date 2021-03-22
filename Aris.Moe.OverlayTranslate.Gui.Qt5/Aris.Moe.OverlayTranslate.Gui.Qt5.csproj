@@ -28,6 +28,7 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Aris.Moe.Ocr.Overlay.Translate\Aris.Moe.Ocr.Overlay.Translate.csproj" />
+        <ProjectReference Include="..\Aris.Moe.OverlayTranslate.Configuration\Aris.Moe.OverlayTranslate.Configuration.csproj" />
         <ProjectReference Include="..\Aris.Moe.OverlayTranslate.Core\Aris.Moe.OverlayTranslate.Core.csproj" />
         <ProjectReference Include="..\Aris.Moe.OverlayTranslate.Gui\Aris.Moe.OverlayTranslate.Gui.csproj" />
     </ItemGroup>

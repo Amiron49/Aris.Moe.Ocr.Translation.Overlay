@@ -6,6 +6,6 @@ namespace Aris.Moe.Ocr
 {
     public interface IOcr
     {
-        Task<IEnumerable<ISpatialText>> Ocr(Stream image, string? inputLanguage = null);
+        Task<(IEnumerable<ISpatialText> Texts, string Language)> Ocr(Stream image, string? inputLanguage = null);
     }
 }
