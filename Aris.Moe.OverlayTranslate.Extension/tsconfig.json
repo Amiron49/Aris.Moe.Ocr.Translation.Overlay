@@ -10,6 +10,12 @@
         "target": "es5",
         "allowJs": true,
         "jsx": "react",
+        "lib": [
+            "dom",
+            "es5",
+            "scripthost",
+            "es2015.promise"
+        ]
     },
     "include": [
         "./src/**/*",

@@ -68,6 +68,9 @@ const config = {
       patterns: [{ from: "public", to: "." }],
     }),
   ],
+  optimization: {
+    minimize: false
+  }
 };
 
 module.exports = config;
