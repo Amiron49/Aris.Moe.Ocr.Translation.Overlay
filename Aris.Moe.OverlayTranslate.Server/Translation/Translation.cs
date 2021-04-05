@@ -7,5 +7,11 @@ namespace Aris.Moe.OverlayTranslate.Server.Translation
     {
         public string Language { get; init; }
         public IEnumerable<TSpatial> Texts { get; init; }
+        
+        public Translation(string language, IEnumerable<TSpatial> texts)
+        {
+            Language = language;
+            Texts = texts;
+        }
     }
 }

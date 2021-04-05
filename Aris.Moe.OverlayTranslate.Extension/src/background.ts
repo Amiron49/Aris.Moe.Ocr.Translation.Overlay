@@ -2,16 +2,18 @@ import {
     ActivateContentScriptCommand, ActivateContentScriptEvent, ContentScriptUnloadEvent, DeactivateContentScriptEvent,
     IEvent,
     IsActiveInTabQuery,
-    IsActiveInTabQueryResponse,
+    IsActiveInTabQueryResponse, PublicTranslateQuery, PublicTranslateQueryResponse,
 } from "./types";
 import {Helper} from "./helper";
+import {PublicOcrTranslationRequest} from "./content/ocrTranslate/publicOcrTranslationRequest";
+import {BackgroundOcrTranslateService} from "./content/ocrTranslate/backgroundOcrTranslateService";
+import MessageSender = chrome.runtime.MessageSender;
 
 let contentScriptState: {
     [key: number]: boolean;
 } = {}
 
 chrome.runtime.onMessage.addListener((message: IEvent, sender, sendResponse) => {
-    console.log(`background saw event ${message.identifier}`)
     switch (message.identifier) {
         case ActivateContentScriptCommand.identifier:
             activateContentScriptForCurrentTab();
@@ -33,16 +35,33 @@ chrome.runtime.onMessage.addListener((message: IEvent, sender, sendResponse) => 
         case ActivateContentScriptEvent.identifier:
             contentScriptState[sender.tab!.id!] = true;
             break;
+        case PublicTranslateQuery.identifier:
+            let asPublicTranslateQuery = <PublicTranslateQuery>message;
+            BackgroundOcrTranslateService.translatePublic(asPublicTranslateQuery.request)
+                .then((x: PublicTranslateQueryResponse) => {
+                sendResponse(x);
+            });
+            return true;
         default:
-            break;
+            return false;
+    }
+    
+    return false;
+});
+
+chrome.runtime.onMessage.addListener((message: IEvent, sender, sendResponse) => {
+    switch (message.identifier) {
+      
+        default:
+            return false;
     }
 });
 
-function isAlreadyActiveForTab(tabId: number):boolean {
+function isAlreadyActiveForTab(tabId: number): boolean {
     return contentScriptState[tabId];
 }
 
-function isAlreadyInjectedInTab(tabId: number):boolean {
+function isAlreadyInjectedInTab(tabId: number): boolean {
     return contentScriptState[tabId] != null;
 }
 
@@ -60,6 +79,6 @@ async function activateContentScriptForCurrentTab() {
     chrome.tabs.executeScript({
         file: 'content.js'
     })
-    
+
     contentScriptState[currentTabId] = true;
 }

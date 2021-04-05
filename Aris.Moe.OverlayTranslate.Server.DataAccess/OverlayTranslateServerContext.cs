@@ -1,17 +1,16 @@
 ﻿using Aris.Moe.OverlayTranslate.Server.DataAccess.Model;
-using Aris.Moe.OverlayTranslate.Server.Image;
 using Microsoft.EntityFrameworkCore;
 
 namespace Aris.Moe.OverlayTranslate.Server.DataAccess
 {
     public abstract class OverlayTranslateServerContext : DbContext
     {
-        public DbSet<ImageReferenceModel> Images { get; set; }
-        public DbSet<RawMachineOcrModel> RawMachineOcrs { get; set; }
-        public DbSet<ConsolidatedMachineOcrModel> ConsolidatedMachineOcrs { get; set; }
-        public DbSet<AddressableSpatialTextModel> SpatialTexts { get; set; }
-        public DbSet<MachineTranslationModel> MachineTranslations { get; set; }
-        public DbSet<VoteModel> Votes { get; set; }
+        public DbSet<ImageReferenceModel> Images { get; set; } = null!;
+        public DbSet<RawMachineOcrModel> RawMachineOcrs { get; set; } = null!;
+        public DbSet<ConsolidatedMachineOcrModel> ConsolidatedMachineOcrs { get; set; } = null!;
+        public DbSet<AddressableSpatialTextModel> SpatialTexts { get; set; } = null!;
+        public DbSet<MachineTranslationModel> MachineTranslations { get; set; } = null!;
+        public DbSet<VoteModel> Votes { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,7 +24,7 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
             });
             modelBuilder.Entity<RawMachineOcrModel>(rawMachineOcr =>
             {
-                rawMachineOcr.HasOne<ImageReference>().WithMany().HasForeignKey(x => x.ForImage);
+                rawMachineOcr.HasOne<ImageReferenceModel>().WithMany().HasForeignKey(x => x.ForImage);
             });
             modelBuilder.Entity<ConsolidatedMachineOcrModel>(consolidatedMachineOcr =>
             {

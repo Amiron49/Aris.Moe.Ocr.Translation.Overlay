@@ -16,9 +16,11 @@ namespace Aris.Moe.OverlayTranslate.Server.Ocr
         private readonly IMachineOcrRepository _machineOcrRepository;
         private readonly IOcr _ocr;
 
-        public OcrService(ISpatialTextConsolidator spatialTextConsolidator)
+        public OcrService(ISpatialTextConsolidator spatialTextConsolidator, IMachineOcrRepository machineOcrRepository, IOcr ocr)
         {
             _spatialTextConsolidator = spatialTextConsolidator;
+            _machineOcrRepository = machineOcrRepository;
+            _ocr = ocr;
         }
 
         public async Task<ConsolidatedMachineAddressableOcr> MachineOcrImage(ImageReference reference, Stream content)
@@ -26,13 +28,9 @@ namespace Aris.Moe.OverlayTranslate.Server.Ocr
             var (texts, language) = await _ocr.Ocr(content);
             var spatialTexts = texts as ISpatialText[] ?? texts.ToArray();
 
-            var rawMachineOcr = new RawMachineOcr
+            var rawMachineOcr = new RawMachineOcr(language, MachineOcrProvider.Google, DateTime.UtcNow, spatialTexts)
             {
-                Created = DateTime.UtcNow,
-                Provider = MachineOcrProvider.Google,
-                Texts = spatialTexts,
-                ForImage = reference.Id,
-                Language = language
+                ForImage = reference.Id
             };
 
             rawMachineOcr = await _machineOcrRepository.Save(rawMachineOcr);
@@ -46,13 +44,13 @@ namespace Aris.Moe.OverlayTranslate.Server.Ocr
         {
             var consolidated = _spatialTextConsolidator.Consolidate(rawMachineOcr.Texts).Select(x => new AddressableSpatialText(x.Text, x.Area));
 
-            var consolidatedMachineOcr = new ConsolidatedMachineAddressableOcr
+            var consolidatedMachineOcr = new ConsolidatedMachineAddressableOcr(
+                rawMachineOcr.Language, rawMachineOcr.Provider,
+                ConsolidationMode.Default,
+                consolidated
+            )
             {
                 RawMachineOcrId = rawMachineOcr.Id!.Value,
-                Consolidation = ConsolidationMode.Default,
-                Provider = rawMachineOcr.Provider,
-                Language = rawMachineOcr.Language,
-                Texts = consolidated,
                 ForImage = rawMachineOcr.ForImage
             };
 

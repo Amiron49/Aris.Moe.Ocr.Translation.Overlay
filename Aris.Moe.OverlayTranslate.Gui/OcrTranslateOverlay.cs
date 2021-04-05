@@ -179,8 +179,8 @@ namespace Aris.Moe.OverlayTranslate.Gui
             });
         }
 
-        private double progressCount = 0;
-        private System.Timers.Timer timer;
+        // private double progressCount = 0;
+        // private System.Timers.Timer timer;
         
         public void DisplayProgress()
         {

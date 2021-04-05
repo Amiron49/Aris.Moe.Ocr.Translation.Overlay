@@ -12,14 +12,14 @@ namespace Aris.Moe.OverlayTranslate.Server
         /// </summary>
         [Required]
         [MaxLength(4000)]
-        public string ImageUrl { get; set; }
+        public string ImageUrl { get; set; } = null!;
 
         /// <summary>
         /// SHAH256 hash of the image for quick lookup
         /// </summary>
         [Required]
         [MaxLength(300)]
-        public byte[] ImageHash { get; set; }
+        public byte[] ImageHash { get; set; } = null!;
 
         /// <summary>
         /// Optional ApiKey for accessing privileged features or special account bound usage quota

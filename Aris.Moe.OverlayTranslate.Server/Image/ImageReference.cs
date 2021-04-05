@@ -8,5 +8,13 @@ namespace Aris.Moe.OverlayTranslate.Server.Image
         public ImageInfo Info { get; init; }
         public string? OriginalUrl { get; init; }
         public double QualityScore { get; init; }
+
+        public ImageReference(Guid id, ImageInfo info, string? originalUrl, double qualityScore)
+        {
+            Id = id;
+            Info = info;
+            OriginalUrl = originalUrl;
+            QualityScore = qualityScore;
+        }
     }
 }

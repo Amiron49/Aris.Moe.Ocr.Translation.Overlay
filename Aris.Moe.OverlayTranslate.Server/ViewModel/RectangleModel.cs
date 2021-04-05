@@ -4,8 +4,8 @@ namespace Aris.Moe.OverlayTranslate.Server.ViewModel
 {
     public class RectangleModel
     {
-        public PointModel TopLeft { get; set; }
-        public PointModel BottomRight { get; set; }
+        public PointModel TopLeft { get; set; } = null!;
+        public PointModel BottomRight { get; set; } = null!;
     }
 
     public static class RectangleExtension

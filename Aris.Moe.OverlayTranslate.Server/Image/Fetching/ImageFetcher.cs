@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Aris.Moe.OverlayTranslate.Server.Image.Fetching.Errors;
+using Aris.Moe.OverlayTranslate.Server.Image.Fetching.Error;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
@@ -24,12 +24,12 @@ namespace Aris.Moe.OverlayTranslate.Server.Image.Fetching
             _domainStatistics = domainStatistics;
         }
 
-        public async Task<Result<Stream?>> Get(string url)
+        public async Task<Result<Stream>> Get(string url)
         {
             var domainStatistics = _domainStatistics.GetStats(url);
             var requestRatePerSecond = domainStatistics.RequestsPerSecond();
             if (requestRatePerSecond >= MaxDomainRequestsPerSecond)
-                return Result.Fail<Stream?>(new ExternalRequestSafetyQuotaError(domainStatistics.Domain, MaxDomainRequestsPerSecond));
+                return Result.Fail<Stream>(new ExternalRequestSafetyQuotaError(domainStatistics.Domain, MaxDomainRequestsPerSecond));
             
             using var client = new HttpClient()
             {
@@ -47,22 +47,25 @@ namespace Aris.Moe.OverlayTranslate.Server.Image.Fetching
                 var error = GetResponseError(domainStatistics.Domain, response);
 
                 if (error != null)
-                    return Result.Fail<Stream?>(error);
+                    return Result.Fail<Stream>(error);
             }
             catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
             {
-                return Result.Fail<Stream?>(new ImageTimeoutError());
+                return Result.Fail<Stream>(new ImageTimeoutError());
             }
             catch (Exception e)
             {
-                var correlation = Guid.NewGuid();
                 _logger.LogError(e, "Failed to fetch image due to an unknown error");
-                
-                return Result.Fail<Stream?>(new UnknownImageFetchingError(correlation.ToString()));
+                return Result.Fail<Stream>(new UnknownImageFetchingError().CausedBy(e));
             }
 
             var contentStream = await response.Content.ReadAsStreamAsync();
-            return Result.Ok<Stream?>(new StreamLengthGuard(contentStream, domainStatistics.Domain, MaxContentLength));
+            await using var streamLengthGuard = new StreamLengthGuard(contentStream, domainStatistics.Domain, MaxContentLength);
+            
+            var memoryStream = new MemoryStream();
+            await streamLengthGuard.CopyToAsync(memoryStream);
+
+            return Result.Ok<Stream>(memoryStream);
         }
 
         private FluentResults.Error? GetResponseError(string domain, HttpResponseMessage responseMessage)
@@ -89,7 +92,7 @@ namespace Aris.Moe.OverlayTranslate.Server.Image.Fetching
 
         private long? GetContentLength(string domain, HttpResponseMessage responseMessage)
         {
-            var contentLength = responseMessage.Headers.GetValues("Content-Length").FirstOrDefault();
+            var contentLength = responseMessage.Content.Headers.GetValues("Content-Length").FirstOrDefault();
 
             if (string.IsNullOrEmpty(contentLength))
             {

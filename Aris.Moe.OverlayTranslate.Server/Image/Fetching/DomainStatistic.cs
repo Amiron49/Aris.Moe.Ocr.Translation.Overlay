@@ -16,7 +16,10 @@ namespace Aris.Moe.OverlayTranslate.Server.Image.Fetching
 
         public double RequestsPerSecond()
         {
-            var maxTime = Requests.Contents.Max();
+            if (!Requests.Contents.Any())
+                return 0;
+            
+            var maxTime =  Requests.Contents.Max();
             var minTime = Requests.Contents.Min();
             var count = Requests.Contents.Count;
 

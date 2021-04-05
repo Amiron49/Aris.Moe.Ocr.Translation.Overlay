@@ -71,34 +71,3 @@ export interface ButtonState {
     snowing: boolean;
     contentScriptActive: boolean;
 }
-
-// export class Button extends React.Component {
-//   const [snowing, setSnowing] = React.useState(true);
-//
-//   React.useEffect(() => {
-//   chrome.runtime.sendMessage({ type: "REQ_SNOW_STATUS" });
-//
-//   chrome.runtime.onMessage.addListener((message: MessageTypes) => {
-//   switch (message.type) {
-//   case "SNOW_STATUS":
-//       setSnowing(message.snowing);
-//   break;
-//   default:
-//   break;
-// }
-// });
-// }, []);
-//
-// const onClick = () => {
-//   chrome.runtime.sendMessage(new ActivateContentScriptEvent());
-// };
-//
-// redner
-// return (
-//     <div className="buttonContainer">
-//       <button className="snowButton" onClick={onClick}>
-//         {snowing ? "Disable the snow 🥶" : "Let it snow! ❄️"}
-//       </button>
-//     </div>
-// );
-// };

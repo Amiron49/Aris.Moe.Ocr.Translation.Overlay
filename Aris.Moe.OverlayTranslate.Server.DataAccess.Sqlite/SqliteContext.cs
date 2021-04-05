@@ -1,15 +1,28 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
+using Aris.Moe.OverlayTranslate.Configuration;
 using Aris.Moe.OverlayTranslate.Server.DataAccess.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite
 {
     public class SqliteContext : OverlayTranslateServerContext
     {
+        private readonly DatabaseConfiguration _databaseConfiguration;
+
+        public SqliteContext(DatabaseConfiguration databaseConfiguration)
+        {
+            _databaseConfiguration = databaseConfiguration;
+            if (_databaseConfiguration.ConnectionString == null)
+                // ReSharper disable once CA2208
+                throw new ArgumentNullException(nameof(databaseConfiguration.ConnectionString));
+        }
+        
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("W:\\temp.sqlite");
-            
+            optionsBuilder.UseSqlite(_databaseConfiguration.ConnectionString!);
+
             base.OnConfiguring(optionsBuilder);
         }
 
@@ -22,6 +35,17 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite
                     .HasConversion(document => document.RootElement.GetRawText(), s => JsonDocument.Parse(s, default));
             });
             base.OnModelCreating(modelBuilder);
+        }
+    }
+    
+    public class SqliteDesignTimeFactory : IDesignTimeDbContextFactory<SqliteContext>
+    {
+        public SqliteContext CreateDbContext(string[] args)
+        {
+            return new SqliteContext(new DatabaseConfiguration()
+            {
+                ConnectionString = ":memory:",
+            });
         }
     }
 }

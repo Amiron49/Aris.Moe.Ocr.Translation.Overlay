@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Aris.Moe.OverlayTranslate.Configuration;
 using Aris.Moe.OverlayTranslate.Server.DataAccess;
 using Aris.Moe.OverlayTranslate.Server.DataAccess.Model;
 using Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite;
@@ -18,6 +19,7 @@ namespace Aris.Moe.OverlayTranslate.Server.AspNetCore
         public ApiRegistry(ApiConfiguration apiConfiguration)
         {
             For<ITranslateConfig>().Use(apiConfiguration);
+            For<DatabaseConfiguration>().Use(apiConfiguration.Database);
             IncludeRegistry(new ServerRegistry(apiConfiguration));
             IncludeRegistry<DataAccessRegistry>();
             For<IResultLogger>().Use<ResultLogger>();

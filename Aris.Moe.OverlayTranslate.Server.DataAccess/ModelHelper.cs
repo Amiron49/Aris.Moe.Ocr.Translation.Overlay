@@ -14,13 +14,7 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
     {
         public static ImageReference ToBusinessModel(this ImageReferenceModel model)
         {
-            return new ImageReference
-            {
-                Id = model.Id,
-                Info = model.Info.ToBusinessModel(),
-                OriginalUrl = model.OriginalUrl,
-                QualityScore = model.QualityScore
-            };
+            return new ImageReference(model.Id, model.Info.ToBusinessModel(), model.OriginalUrl, model.QualityScore);
         }
 
         public static ImageReferenceModel ToModel(this ImageReference model)
@@ -55,55 +49,59 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
 
         public static ConsolidatedMachineAddressableOcr ToBusinessModel(this ConsolidatedMachineOcrModel model)
         {
-            return new()
+            return new(
+                model.Raw.Language,
+                model.Raw.Provider,
+                model.Consolidation,
+                model.Texts.Select(x => new AddressableSpatialText(x.Text, x.Rectangle.ToRectangle())).ToList()
+            )
             {
                 Id = model.Id,
-                Consolidation = model.Consolidation,
-                Language = model.Raw.Language,
-                Provider = model.Raw.Provider,
                 ForImage = model.Raw.ForImage,
-                RawMachineOcrId = model.RawId!.Value,
-                Texts = model.Texts.Select(x => new AddressableSpatialText(x.Text, x.Rectangle.ToRectangle()))
+                RawMachineOcrId = model.RawId!.Value
             };
         }
 
         public static ConsolidatedMachineOcrModel ToModel(this ConsolidatedMachineAddressableOcr model)
         {
-            return new()
+            var addressableSpatialTextModels = model.Texts.Select(x => new AddressableSpatialTextModel
+            {
+                Created = x.Created,
+                Id = x.Id,
+                Language = model.Language,
+                Rectangle = x.Area.ToModel(),
+                Text = x.Text
+            }).ToList();
+            
+            return new ConsolidatedMachineOcrModel
             {
                 Consolidation = model.Consolidation,
                 Id = model.Id,
                 RawId = model.RawMachineOcrId,
-                Texts = model.Texts.Select(x => new AddressableSpatialTextModel
-                {
-                    Created = x.Created,
-                    Id = x.Id,
-                    Language = model.Language,
-                    Rectangle = x.Area.ToModel(),
-                    Text = x.Text
-                })
+                Texts = addressableSpatialTextModels
             };
         }
-        
+
         public static RawMachineOcr ToBusinessModel(this RawMachineOcrModel model)
         {
             var simpleSpatialTexts = JsonSerializer.Deserialize<SimpleSpatialText[]>(model.Texts.RootElement.GetRawText()) ?? Array.Empty<SimpleSpatialText>();
-            
-            return new RawMachineOcr
+
+            return new RawMachineOcr(
+                model.Language,
+                model.Provider,
+                model.Created,
+                simpleSpatialTexts.Select(x => new Moe.Ocr.SpatialText(x.Text, x.Area.ToRectangle())).ToList()
+            )
             {
                 Id = model.Id,
-                Created = model.Created,
-                Language = model.Language,
-                Provider = model.Provider,
                 ForImage = model.ForImage,
-                Texts = simpleSpatialTexts.Select(x => new Moe.Ocr.SpatialText(x.Text, x.Area.ToRectangle()))
             };
         }
 
         private class SimpleSpatialText
         {
-            public string Text { get; set; }
-            public RectangleModel Area { get; set; }
+            public string Text { get; set; } = null!;
+            public RectangleModel Area { get; set; } = null!;
         }
 
         public static RawMachineOcrModel ToModel(this RawMachineOcr model)
@@ -113,7 +111,7 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
                 Area = x.Area.ToModel(),
                 Text = x.Text
             }).ToArray();
-            
+
             return new RawMachineOcrModel
             {
                 Created = model.Created,
@@ -121,28 +119,28 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
                 Language = model.Language,
                 Provider = model.Provider,
                 ForImage = model.ForImage!.Value,
-                Texts = JsonDocument.Parse(JsonSerializer.Serialize(asArray)) 
+                Texts = JsonDocument.Parse(JsonSerializer.Serialize(asArray))
             };
         }
-        
+
         public static MachineTranslation ToBusinessModel(this MachineTranslationModel model)
         {
-            return new()
+            var texts = model.Texts.Select(x => new BasedOnSpatialText(x.Text, x.Rectangle.ToRectangle())
             {
-                Language = model.Texts.First().Language!,
-                Provider = model.Provider,
-                Texts = model.Texts.Select(x => new BasedOnSpatialText(x.Text, x.Rectangle.ToRectangle())
-                {
-                    Created = x.Created,
-                    Id = x.Id,
-                    BasedOn = x.BasedOnSpatialOcrText
-                })
-            };
+                Created = x.Created,
+                Id = x.Id,
+                BasedOn = x.BasedOnSpatialOcrText
+            }).ToList();
+            return new MachineTranslation(
+                model.Texts.First().Language!,
+                texts,
+                model.Provider
+            );
         }
 
         public static MachineTranslationModel ToModel(this MachineTranslation model, int machineId)
         {
-            return new ()
+            return new()
             {
                 MachineOcrId = machineId,
                 Created = DateTime.UtcNow,
@@ -154,7 +152,7 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
                     Rectangle = x.Area.ToModel(),
                     BasedOnSpatialOcrText = x.BasedOn,
                     Text = x.Text
-                })
+                }).ToList()
             };
         }
     }

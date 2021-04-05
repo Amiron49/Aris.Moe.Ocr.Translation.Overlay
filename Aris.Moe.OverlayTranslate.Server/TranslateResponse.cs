@@ -6,8 +6,15 @@ namespace Aris.Moe.OverlayTranslate.Server
 {
     public class TranslateResponse
     {
-        public MatchType Match { get; init; }
-        public ImageInfo? Image { get; init; }
-        public IEnumerable<TranslationViewModel> MachineTranslations { get; init; }
+        public MatchType Match { get; }
+        public ImageInfo Image { get; }
+        public IEnumerable<TranslationViewModel> MachineTranslations { get; }
+        
+        public TranslateResponse(MatchType match, ImageInfo image, IEnumerable<TranslationViewModel> machineTranslations)
+        {
+            Match = match;
+            Image = image;
+            MachineTranslations = machineTranslations;
+        }
     }
 }

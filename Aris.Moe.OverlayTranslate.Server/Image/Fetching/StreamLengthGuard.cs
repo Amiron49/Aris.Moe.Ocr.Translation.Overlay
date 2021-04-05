@@ -48,7 +48,7 @@ namespace Aris.Moe.OverlayTranslate.Server.Image.Fetching
 
         public override bool CanWrite => _streamImplementation.CanWrite;
 
-        public override long Length => _streamImplementation.Length;
+        public override long Length => _maxLength;
 
         public override long Position
         {

@@ -1,16 +1,14 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System;
 using System.Threading.Tasks;
-using Aris.Moe.OverlayTranslate.Server.Image;
-using Aris.Moe.OverlayTranslate.Server.Ocr;
 using Aris.Moe.OverlayTranslate.Server.Ocr.Community;
 
-namespace Aris.Moe.OverlayTranslate.Server
+namespace Aris.Moe.OverlayTranslate.Server.Ocr
 {
-    public interface ICommunityOcrRepository    
+    public interface ICommunityOcrRepository
     {
-        Task<List<AddressableOcr<CommunitySpatialText>>> Get(string hash);
-        Task<IEnumerable<ImageReference>> GetAll(ImageInfo info);
-        Task<ImageReference> Save(Stream image, ImageInfo info);
+        Task<CommunityAddressableOcr> Get(Guid imageId);
+        Task<CommunitySpatialText?> Add(Guid imageId, CommunitySpatialText communitySpatialText);
+        Task<Vote> GetVotingStatus(Guid spatialId, int userId);
+        Task AddOrChangeVote(Guid spatialId, int userId, Vote vote);
     }
 }

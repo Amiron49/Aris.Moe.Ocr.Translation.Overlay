@@ -3,6 +3,6 @@
     public interface ITranslateConfig
     {
         public bool Cache { get; set; }
-        public string CacheFolderRoot { get; set; }
+        public string? CacheFolderRoot { get; set; }
     }
 }

@@ -18,7 +18,8 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
 
         public async Task<ImageReference?> Get(byte[] hash)
         {
-            return (await _context.Images.SingleOrDefaultAsync(x => x.Info.Sha256Hash == hash)).ToBusinessModel();
+            var singleOrDefaultAsync = await _context.Images.SingleOrDefaultAsync(x => x.Info.Sha256Hash == hash);
+            return singleOrDefaultAsync?.ToBusinessModel();
         }
 
         public async Task<ImageReference?> Get(Guid id)

@@ -7,5 +7,11 @@
     {
         public string Text { get; set; }
         public RectangleModel Position { get; set; }
+        
+        public SpatialTextViewModel(string text, RectangleModel position)
+        {
+            Text = text;
+            Position = position;
+        }
     }
 }

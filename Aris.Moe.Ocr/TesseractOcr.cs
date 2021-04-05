@@ -114,7 +114,6 @@ namespace Aris.Moe.Ocr
             using var img = Pix.LoadFromMemory(memoryStream.ToArray());
             using var page = engine.Process(img, PageSegMode.Auto);
 
-            var completeText = page.GetText();
             _logger.LogInformation("Mean confidence: {0}", page.GetMeanConfidence());
 
             var results = new List<ISpatialText>();

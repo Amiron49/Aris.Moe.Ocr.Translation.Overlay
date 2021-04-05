@@ -18,6 +18,6 @@ namespace Aris.Moe.OverlayTranslate.Gui.Qt5
         public string OcrProvider { get; set; } = "Tesseract";
         public string TranslationProvider { get; set; } = "Deepl";
 
-        public LoggingConfiguration Logging { get; set; }
+        public LoggingConfiguration Logging { get; set; } = new LoggingConfiguration();
     }
 }

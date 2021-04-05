@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Aris.Moe.Ocr;
-using Aris.Moe.OverlayTranslate.Server;
+﻿using System.Threading.Tasks;
 using Aris.Moe.OverlayTranslate.Server.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,12 +16,12 @@ namespace Aris.Moe.OverlayTranslate.Server.AspNetCore.Controllers
         }
 
         [HttpPost("public")]
-        public async Task<ActionResult<ResultResponse<OcrTranslateResponse>>> Public(PublicOcrTranslationRequest request)
+        public async Task<ActionResult<ResultResponse<OcrTranslateResponse?>>> Public(PublicOcrTranslationRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             
-            return new ResultResponse<OcrTranslateResponse>(await _overlayTranslateServer.TranslatePublic(request));
+            return new ResultResponse<OcrTranslateResponse?>(await _overlayTranslateServer.TranslatePublic(request));
         }
     }
 }

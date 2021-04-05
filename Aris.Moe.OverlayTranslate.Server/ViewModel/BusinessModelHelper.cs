@@ -10,38 +10,34 @@ namespace Aris.Moe.OverlayTranslate.Server.ViewModel
     {
         public static OcrViewModel ToOcrViewModel(this AddressableOcr<AddressableSpatialText> ocr)
         {
-            return new OcrViewModel
-            {
-                Texts = ocr.Texts.Select(x => ToViewModel(x, ocr.Language)),
-                DetectedLanguage = ocr.Language
-            };
+            return new(
+                ocr.Language,
+                ocr.Texts.Select(x => ToViewModel(x, ocr.Language))
+            );
         }
-        
+
         public static TranslationViewModel ToTranslationViewModel(this Translation<BasedOnSpatialText> translation)
         {
-            return new TranslationViewModel
-            {
-                Texts = translation.Texts.Select(x => x.ToViewModel(translation.Language)),
-                Language = translation.Language
-            };
+            return new(
+                translation.Language,
+                translation.Texts.Select(x => x.ToViewModel(translation.Language))
+            );
         }
 
         public static SpatialTextViewModel ToViewModel(this ISpatialText text, string language)
         {
-            return new()
-            {
-                Position = text.Area.ToModel(),
-                Text = text.Text
-            };
+            return new(
+                text.Text,
+                text.Area.ToModel()
+            );
         }
 
         public static TranslationViewModel ToViewModel(this MachineTranslation translation)
         {
-            return new()
-            {
-                Texts = translation.Texts.Select(x => x.ToViewModel(translation.Language)),
-                Language = translation.Language
-            };
+            return new(
+                translation.Language,
+                translation.Texts.Select(x => x.ToViewModel(translation.Language))
+            );
         }
     }
 }

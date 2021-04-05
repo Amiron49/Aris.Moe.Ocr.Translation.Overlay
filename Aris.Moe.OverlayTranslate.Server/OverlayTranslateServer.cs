@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -67,13 +66,9 @@ namespace Aris.Moe.OverlayTranslate.Server
 
             var machineTranslations = await _translationService.GetAllMachineTranslations(imageReference.Id);
 
-            var ocrTranslateResponse = new OcrTranslateResponse
-            {
-                Match = MatchType.Hash,
-                Image = imageReference.Info,
-                MachineOcrs = machineOcr.Select(x => x.ToOcrViewModel()),
-                MachineTranslations = machineTranslations.Select(x => x.ToTranslationViewModel())
-            };
+            var ocrViewModels = machineOcr.Select(x => x.ToOcrViewModel());
+            var translationViewModels = machineTranslations.Select(x => x.ToTranslationViewModel());
+            var ocrTranslateResponse = new OcrTranslateResponse(MatchType.Hash, imageReference.Info, translationViewModels, ocrViewModels);
 
             return Result.Ok<OcrTranslateResponse?>(ocrTranslateResponse);
         }
@@ -121,21 +116,20 @@ namespace Aris.Moe.OverlayTranslate.Server
 
         private async Task<Result<(ImageReference Reference, Stream Content)?>> TryFetchImage(string url, byte[] expectedHash)
         {
-            const int retryAmount = 1;
+            var fetchImageResult = await _imageFetcher.Get(url);
 
-            ImageReference? image = null;
-            for (var i = 0; i <= retryAmount; i++)
-            {
-                var fetchImageResult = await _imageFetcher.Get(url);
+            if (fetchImageResult.IsFailed)
+                return fetchImageResult.ToResult<(ImageReference Reference, Stream Content)?>();
 
-                if (fetchImageResult.IsFailed)
-                    return fetchImageResult.ToResult<(ImageReference Reference, Stream Content)?>();
+            var imageFactoryResult = await _imageFactory.Create(url, fetchImageResult.Value);
 
-                image = await _imageFactory.Create(url, fetchImageResult.Value);
+            if (!imageFactoryResult.IsSuccess)
+                return imageFactoryResult.ToResult();
 
-                if (image != null && HashHelper.ByteEqual(expectedHash, image!.Info.Sha256Hash))
-                    return Result.Ok<(ImageReference Reference, Stream Content)?>((image, fetchImageResult.Value));
-            }
+            var image = imageFactoryResult.ValueOrDefault;
+            
+            if (image != null && HashHelper.ByteEqual(expectedHash, image!.Info.Sha256Hash))
+                return Result.Ok<(ImageReference Reference, Stream Content)?>((image, fetchImageResult.Value));
 
             if (image == null)
                 return Result.Fail(new CouldntReachImageError());

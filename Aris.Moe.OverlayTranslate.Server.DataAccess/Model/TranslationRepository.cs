@@ -23,16 +23,21 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess.Model
             var translations = await _context.MachineTranslations.Where(x => x.MachineOcr.Raw.ForImage == imageId)
                 .Include(x => x.Texts).ToListAsync();
 
-            return translations.Select(translationModel => new MachineTranslation
+            return translations.Select(translationModel =>
             {
-                Language = translationModel.Texts.First().Language!,
-                Provider = translationModel.Provider,
-                Texts = translationModel.Texts.Select(x => new BasedOnSpatialText(x.Text, x.Rectangle.ToRectangle())
-                {
-                    Created = x.Created,
-                    Id = x.Id,
-                    BasedOn = x.BasedOnSpatialOcrText
-                })
+                var texts = translationModel.Texts.Select(x =>
+                    new BasedOnSpatialText(x.Text, x.Rectangle.ToRectangle())
+                    {
+                        Created = x.Created,
+                        Id = x.Id,
+                        BasedOn = x.BasedOnSpatialOcrText
+                    });
+                
+                return new MachineTranslation(
+                    translationModel.Texts.First().Language!,
+                    texts,
+                    translationModel.Provider
+                );
             });
         }
 

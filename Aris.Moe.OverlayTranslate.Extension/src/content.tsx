@@ -7,32 +7,33 @@ import {
     DeactivateContentScriptEvent,
     IEvent
 } from "./types";
+import * as React from "react";
+import {Overlay} from "./content/overlay";
+import {ArrayHelper} from "./content/arrayHelper";
 
 debugger;
 
 class ContentScriptManager {
-    private readonly overlayedImageTags: HTMLImageElement[] = [];
+    private readonly overlays: Overlay[] = [];
     private readonly overlayContainer: HTMLDivElement;
 
     constructor() {
         this.overlayContainer = ContentScriptManager.createOverlayContainer();
-        this.hookUntoAllImageTags();
+        this.overlayAllImageTags();
     }
 
     Init() {
-        if ((<any>window).honyakuWasActive) {
+        if ((window as any).honyakuWasActive) {
             console.error("The honyaku extension was already here. Suppressing content script startup")
             return;
         }
-        (<any>window).honyakuWasActive = true
+        (window as any).honyakuWasActive = true
         console.log("content is alive")
 
         chrome.runtime.onMessage.addListener((message: IEvent, sender, sendResponse) => {
-            console.log("EVENT BRO");
             if (message.identifier == ActivateContentScriptCommand.identifier) {
                 this.activate();
             }
-
             if (message.identifier == DeactivateContentScriptCommand.identifier) {
                 this.deactivate();
             }
@@ -62,63 +63,23 @@ class ContentScriptManager {
         chrome.runtime.sendMessage(new DeactivateContentScriptEvent());
     }
     
-    private hookUntoAllImageTags() {
-        let allImages = this.toArray(document.getElementsByTagName('img'));
-        let newImages = this.except(allImages, this.overlayedImageTags);
+    private overlayAllImageTags() {
+        let images = document.getElementsByTagName('img');
+        let allImages = ArrayHelper.toArray(images).filter(x => x.naturalHeight > 200 && x.naturalWidth > 200);
+        let newImages = ArrayHelper.except(allImages, this.overlays.map(x => x.overlayTarget));
 
         for (const image of newImages) {
-            let singleImageOverlay = ContentScriptManager.crateSingleImageOverlay(image)
-            this.overlayContainer.appendChild(singleImageOverlay);
+            let newOverlay = new Overlay(this.overlayContainer, image)
+            newOverlay.attach();
+            this.overlays.push(newOverlay);
         }
     }
-
-    private except<T>(something: T[], except: T[]): T[] {
-        let result: T[] = [];
-
-        return something.filter(x => !except.find(y => y == x));
-    }
-
-
-    private toArray<T extends Element>(something: HTMLCollectionOf<T>): T[] {
-        let array: T[] = [];
-
-        for (let i = 0; i < something.length; i++) {
-            array.push(something.item(i)!);
-        }
-
-        return array;
-    }
-
-
 
     private doStuffAgain() {
         setTimeout(() => {
             console.log("I'm alive")
             this.doStuffAgain();
         }, 500)
-    }
-
-    private static crateSingleImageOverlay(targetElement: HTMLImageElement):HTMLDivElement {
-        let container = document.createElement("div");
-        container.className = 'honyaku-image-overlay-container'
-        
-        let boundingRectangle = targetElement.getBoundingClientRect();
-
-        let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        container.style.left = `${scrollLeft + boundingRectangle.x}px`;
-        container.style.top = `${scrollTop + boundingRectangle.y}px`;
-        container.style.width = `${boundingRectangle.width}px`;
-        container.style.height = `${boundingRectangle.height}px`;
-        
-        let snowContainer = this.createSnowflakesContainer();
-        
-        container.appendChild(snowContainer);
-        
-        console.log(`x:${boundingRectangle.x} y:${boundingRectangle.y} w:${boundingRectangle.width} h:${boundingRectangle.height}`)
-        
-        return container;
     }
     
     private static createOverlayContainer(): HTMLDivElement {
@@ -156,25 +117,10 @@ class ContentScriptManager {
 
         // observer.observe(container, { attributes: true, childList: true, subtree: true });
 
-        return <HTMLDivElement>container;
-    }
-    
-    private static createSnowflakesContainer(): HTMLDivElement {
-        let container = document.createElement("div");
-        container.className = "snowflakes";
-        container.setAttribute("aria-hidden", "true");
-
-        const snowflake = document.createElement("div");
-        snowflake.className = "snowflake";
-        snowflake.innerHTML = "❆";
-
-        for (let i = 0; i < 12; i++) {
-            container.appendChild(snowflake.cloneNode(true));
-        }
-        
-        return container;
+        return container as HTMLDivElement;
     }
 }
 
 let honyakuContentScriptManager = new ContentScriptManager()
 honyakuContentScriptManager.Init();
+

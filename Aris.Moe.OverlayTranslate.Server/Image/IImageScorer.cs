@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 
 namespace Aris.Moe.OverlayTranslate.Server.Image

@@ -16,9 +16,9 @@ namespace Aris.Moe.OverlayTranslate.Core
             //For<INeedConfiguration>().Add<GoogleOcr>();
             
             For<ITranslate>().Use<GoogleTranslate>();
-            For<ITranslate>().DecorateAllWith<TranslateDebugCache>();
+            //For<ITranslate>().DecorateAllWith<TranslateDebugCache>();
             For<IOcr>().Use<GoogleOcr>();
-            For<IOcr>().DecorateAllWith<OcrDebugCache>();
+            //For<IOcr>().DecorateAllWith<OcrDebugCache>();
 
             For<ISpatialTextConsolidator>().Use<VerticalTextConsolidator>();
         }

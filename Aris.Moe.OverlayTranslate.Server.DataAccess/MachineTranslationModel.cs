@@ -8,7 +8,7 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
     public class MachineTranslationModel
     {
         public int Id { get; set; }
-        public ConsolidatedMachineOcrModel MachineOcr { get; set; }
+        public ConsolidatedMachineOcrModel MachineOcr { get; set; } = null!;
         public int MachineOcrId { get; set; }
         public MachineTranslationProvider Provider { get; set; }
         public DateTime Created { get; set; }

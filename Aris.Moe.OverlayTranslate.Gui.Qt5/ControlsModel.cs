@@ -57,7 +57,7 @@ namespace Aris.Moe.OverlayTranslate.Gui.Qt5
             var needConfigurations = Program.Services.GetAllInstances<INeedConfiguration>();
 
             var withIssues = needConfigurations
-                .Select(x => (Name: x.Name, Issues: x.GetConfigurationIssues().ToList())).Where(x => x.Issues.Any()).ToList();
+                .Select(x => (x.Name, Issues: x.GetConfigurationIssues().ToList())).Where(x => x.Issues.Any()).ToList();
 
             if (!withIssues.Any())
                 return "Configuration seems fine";

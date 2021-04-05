@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Numerics;
 using Aris.Moe.ScreenHelpers;
 using ImGuiNET;
-using Microsoft.Extensions.Logging;
 
 namespace Aris.Moe.OverlayTranslate.Gui.Overlay.Modes
 {
@@ -58,12 +57,10 @@ namespace Aris.Moe.OverlayTranslate.Gui.Overlay.Modes
         }
         
         private readonly IScreenInformation _screenInformation;
-        private readonly ILogger _logger;
 
-        public TargetAreaResizeOverlay(IScreenInformation screenInformation, ILogger<TargetAreaResizeOverlay> logger)
+        public TargetAreaResizeOverlay(IScreenInformation screenInformation)
         {
             _screenInformation = screenInformation;
-            _logger = logger;
         }
 
         public void AskForResize(Rectangle current, Action<Rectangle?> resultCallback)
@@ -84,6 +81,7 @@ namespace Aris.Moe.OverlayTranslate.Gui.Overlay.Modes
 
         private ResizeOperation? _currentResizeOperation;
 
+        // ReSharper disable once UnassignedGetOnlyAutoProperty
         public bool ShouldRender { get; }
         public event EventHandler? OnWantsToRender;
 

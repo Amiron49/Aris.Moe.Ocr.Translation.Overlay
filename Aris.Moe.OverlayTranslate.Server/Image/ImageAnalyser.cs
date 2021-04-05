@@ -3,7 +3,6 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using CoenM.ImageHash.HashAlgorithms;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace Aris.Moe.OverlayTranslate.Server.Image
@@ -13,23 +12,17 @@ namespace Aris.Moe.OverlayTranslate.Server.Image
         public async Task<ImageInfo> Analyse(Stream imageStream)
         {
             // ReSharper disable once UseAwaitUsing
-            using var hoistyBoisty = new MemoryStream();
-
-            await imageStream.CopyToAsync(hoistyBoisty);
-
-            if (hoistyBoisty.Length == 0)
+            if (imageStream.Length == 0)
                 throw new Exception("Image stream is 0");
 
             byte[] shaHash;
             using (var sha256Hasher = SHA256.Create())
             {
-                shaHash = await sha256Hasher.ComputeHashAsync(hoistyBoisty);
+                shaHash = await sha256Hasher.ComputeHashAsync(imageStream);
             }
             
-            var (image, format) = await SixLabors.ImageSharp.Image.LoadWithFormatAsync<Rgba32>(new SixLabors.ImageSharp.Configuration
-            {
-                ReadOrigin = ReadOrigin.Begin,
-            }, hoistyBoisty);
+            imageStream.Position = 0;
+            var (image, format) = await SixLabors.ImageSharp.Image.LoadWithFormatAsync<Rgba32>(imageStream);
 
             using (image)
             {

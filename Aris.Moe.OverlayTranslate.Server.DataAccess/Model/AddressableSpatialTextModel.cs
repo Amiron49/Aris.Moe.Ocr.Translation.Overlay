@@ -11,9 +11,9 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess.Model
         public ConsolidatedMachineOcrModel? MachineOcr { get; set; }
         public int? MachineTranslationId { get; set; }
         public int? UserId { get; set; }
-        public string Text { get; set; }
+        public string Text { get; set; } = null!;
         public string? Language { get; set; }
         public DateTime Created { get; set; }
-        public RectangleModel Rectangle { get; set; }
+        public RectangleModel Rectangle { get; set; } = null!;
     }
 }

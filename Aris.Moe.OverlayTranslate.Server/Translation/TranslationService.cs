@@ -23,12 +23,8 @@ namespace Aris.Moe.OverlayTranslate.Server.Translation
         {
             var translated = await _translate.Translate(source.Texts.Select(x => x.Text), "en", source.Language);
 
-            var machineTranslation = new MachineTranslation
-            {
-                Language = "en",
-                Provider = MachineTranslationProvider.Deepl,
-                Texts = ToSpatialTexts(source.Texts.ToList(), translated.ToList())
-            };
+            var basedOnSpatialTexts = ToSpatialTexts(source.Texts.ToList(), translated.ToList());
+            var machineTranslation = new MachineTranslation("en", basedOnSpatialTexts, MachineTranslationProvider.Deepl);
 
             return await _translationRepository.SaveMachineTranslation(source.Id!.Value, machineTranslation);
         }

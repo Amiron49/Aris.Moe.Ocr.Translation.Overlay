@@ -1,9 +1,9 @@
-﻿namespace Aris.Moe.OverlayTranslate.Server.Image.Fetching.Errors
+﻿namespace Aris.Moe.OverlayTranslate.Server.Image.Fetching.Error
 {
-    public class UnknownImageFetchingError : FluentResults.Error
+    public class UnknownImageFetchingError : CorrelatedError
     {
-        public UnknownImageFetchingError(string errorCorrelation) : base(
-            $"Something not anticipated by me went wrong when fetching the image. Very likely it's my fault (or you are being naughty and triggered a safety feature). Please make a bug report with this correlationID: {errorCorrelation}")
+        public UnknownImageFetchingError() : base(
+            "Something not anticipated by me went wrong when fetching the image. Very likely it's my fault (or you are being naughty and triggered a safety feature).")
         {
         }
     }

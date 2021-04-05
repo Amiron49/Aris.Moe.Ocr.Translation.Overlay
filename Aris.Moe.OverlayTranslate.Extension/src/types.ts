@@ -1,3 +1,7 @@
+import {PublicOcrTranslationRequest} from "./content/ocrTranslate/publicOcrTranslationRequest";
+import {OcrTranslateResponse} from "./content/ocrTranslate/ocrTranslateResponse";
+import {ResultResponse} from "./content/ocrTranslate/backgroundOcrTranslateService";
+
 export type MessageTypes = "ActivateContentScript" | "DeactivateContentScript";
 
 export interface IEvent {
@@ -59,3 +63,13 @@ export class IsActiveInTabQuery extends BaseEvent {
 }
 
 export type IsActiveInTabQueryResponse = {active: boolean, state: boolean}
+
+export class PublicTranslateQuery extends BaseEvent {
+    static identifier: string = "PublicTranslateQuery";
+
+    constructor(public request: PublicOcrTranslationRequest) {
+        super(PublicTranslateQuery.identifier);
+    }
+}
+
+export type PublicTranslateQueryResponse = ResultResponse<OcrTranslateResponse>

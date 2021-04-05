@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-namespace Aris.Moe.Translate
+﻿namespace Aris.Moe.Translate
 {
     public class Translation
     {

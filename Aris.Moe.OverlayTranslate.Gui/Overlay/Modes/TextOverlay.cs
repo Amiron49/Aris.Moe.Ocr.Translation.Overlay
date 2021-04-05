@@ -11,6 +11,7 @@ namespace Aris.Moe.OverlayTranslate.Gui.Overlay.Modes
     {
         private volatile ConcurrentBag<ISpatialText> _activeTexts = new ConcurrentBag<ISpatialText>();
 
+        // ReSharper disable once UnassignedGetOnlyAutoProperty
         public bool ShouldRender { get; }
         public event EventHandler? OnWantsToRender;
 
@@ -52,11 +53,11 @@ namespace Aris.Moe.OverlayTranslate.Gui.Overlay.Modes
         {
             foreach (var text in texts) _activeTexts.Add(text);
         }
-        
+
 
         private static (Rectangle compensatedArea, float compensatedFontScale) CompensateForRender(ISpatialText text)
         {
-            const float defaultFontScale = 0.4f;
+            //const float defaultFontScale = 0.4f;
             const int imGuiPadding = 8;
 
             var calculatedSize = ImGui.CalcTextSize(text.Text);
@@ -64,8 +65,7 @@ namespace Aris.Moe.OverlayTranslate.Gui.Overlay.Modes
             var areaHeight = Math.Abs(text.Area.Height);
             var areaWidth = Math.Abs(text.Area.Width);
 
-            var estimatedTextAreaAlternate = calculatedSize.X * calculatedSize.Y;
-            var estimatedTextArea = calculatedSize.X * calculatedSize.Y ;
+            var estimatedTextArea = calculatedSize.X * calculatedSize.Y;
             var additionalPaddingArea = areaWidth * imGuiPadding * 2 + areaHeight * imGuiPadding * 2 - imGuiPadding * imGuiPadding * 4;
 
 
@@ -78,7 +78,7 @@ namespace Aris.Moe.OverlayTranslate.Gui.Overlay.Modes
             {
                 var extraAreaFactor = availableArea / neededArea;
 
-                return (text.Area, (float)Math.Sqrt(extraAreaFactor * 0.5));
+                return (text.Area, (float) Math.Sqrt(extraAreaFactor * 0.5));
             }
 
             var scaleFactor = Math.Sqrt(neededArea / availableArea);

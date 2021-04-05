@@ -8,7 +8,7 @@ namespace Aris.Moe.OverlayTranslate.Server
     public class TranslationLookupRequest : IHashLookup
     {
         [Required]
-        public byte[] ImageHash { get; set; }
+        public byte[] ImageHash { get; set; } = null!;
 
         public string? ApiKey { get; set; }
     }

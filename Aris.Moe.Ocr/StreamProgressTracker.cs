@@ -29,7 +29,7 @@ namespace Aris.Moe.Ocr
             return _streamImplementation.Read(buffer, offset, count);
         }
 
-        private long _alreadyLoadedBytes = 0;
+        private long _alreadyLoadedBytes;
         
         public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {

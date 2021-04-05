@@ -1,4 +1,4 @@
-﻿namespace Aris.Moe.OverlayTranslate.Server.Image.Fetching.Errors
+﻿namespace Aris.Moe.OverlayTranslate.Server.Image.Fetching.Error
 {
     public class ImageTooSmallError : FluentResults.Error
     {

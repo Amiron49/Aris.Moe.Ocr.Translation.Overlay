@@ -4,7 +4,6 @@ using Aris.Moe.Ocr;
 using Aris.Moe.Overlay;
 using Aris.Moe.OverlayTranslate.Gui.Overlay.Modes;
 using Aris.Moe.ScreenHelpers;
-using Microsoft.Extensions.Logging;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace Aris.Moe.OverlayTranslate.Gui.Overlay
@@ -26,10 +25,10 @@ namespace Aris.Moe.OverlayTranslate.Gui.Overlay
 
         private OverlayMode _currentMode = OverlayMode.TextOverlay;
 
-        public Overlay(IScreenInformation screenInformation, ILogger<TargetAreaResizeOverlay> logger, IProgressDisplayGuiMode progressDisplay) : base(screenInformation)
+        public Overlay(IScreenInformation screenInformation, IProgressDisplayGuiMode progressDisplay) : base(screenInformation)
         {
             _textOverlay = new TextOverlay();
-            _resizeOverlay = new TargetAreaResizeOverlay(screenInformation, logger);
+            _resizeOverlay = new TargetAreaResizeOverlay(screenInformation);
             _progressDisplay = progressDisplay;
 
             _progressDisplay.OnWantsToRender += (sender, args) =>

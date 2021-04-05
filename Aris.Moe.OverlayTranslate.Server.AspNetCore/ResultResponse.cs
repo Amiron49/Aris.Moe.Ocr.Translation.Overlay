@@ -7,7 +7,7 @@ namespace Aris.Moe.OverlayTranslate.Server.AspNetCore
     {
         public T? Result { get; }
         public bool Success { get; }
-        public string Message { get; }
+        public string? Message { get; }
 
         public ResultResponse(Result<T> result)
         {

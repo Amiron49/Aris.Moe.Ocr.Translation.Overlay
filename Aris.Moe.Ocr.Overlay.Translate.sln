@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.OverlayTranslate.S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.OverlayTranslate.Configuration", "Aris.Moe.OverlayTranslate.Configuration\Aris.Moe.OverlayTranslate.Configuration.csproj", "{6A7F1539-CC9C-4042-B37C-61C8487E8FBC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.OverlayTranslate.Server.IntegrationTests", "Aris.Moe.OverlayTranslate.Server.IntegrationTests\Aris.Moe.OverlayTranslate.Server.IntegrationTests.csproj", "{03FE5908-5257-4F6A-B599-95FFAD2B5131}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -96,5 +98,9 @@ Global
 		{6A7F1539-CC9C-4042-B37C-61C8487E8FBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A7F1539-CC9C-4042-B37C-61C8487E8FBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A7F1539-CC9C-4042-B37C-61C8487E8FBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03FE5908-5257-4F6A-B599-95FFAD2B5131}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03FE5908-5257-4F6A-B599-95FFAD2B5131}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03FE5908-5257-4F6A-B599-95FFAD2B5131}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03FE5908-5257-4F6A-B599-95FFAD2B5131}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
