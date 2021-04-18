@@ -40,7 +40,10 @@ namespace Aris.Moe.OverlayTranslate.Server.Image
             image.Position = 0;
             var score = await _imageScorer.Calculate(image, imageInfo);
             
-            return Result.Ok(new ImageReference(Guid.NewGuid(), imageInfo, url, score));
+            return Result.Ok(new ImageReference(Guid.NewGuid(), imageInfo, score)
+            {
+                OriginalUrl = url
+            });
         }
     }
 

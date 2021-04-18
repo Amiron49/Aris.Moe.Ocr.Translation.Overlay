@@ -6,6 +6,7 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
     public abstract class OverlayTranslateServerContext : DbContext
     {
         public DbSet<ImageReferenceModel> Images { get; set; } = null!;
+        public DbSet<ImageUrl> Urls { get; set; } = null!;
         public DbSet<RawMachineOcrModel> RawMachineOcrs { get; set; } = null!;
         public DbSet<ConsolidatedMachineOcrModel> ConsolidatedMachineOcrs { get; set; } = null!;
         public DbSet<AddressableSpatialTextModel> SpatialTexts { get; set; } = null!;
@@ -21,7 +22,15 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
                     builder.HasIndex(x => x.Sha256Hash);
                     builder.HasIndex(x => x.AverageHash);
                 });
+                
+                reference.HasMany(x => x.Urls).WithOne().HasForeignKey(x => x.ImageReferenceId);
             });
+
+            modelBuilder.Entity<ImageUrl>(imageUrl =>
+            {
+                imageUrl.HasKey(x => x.UrlHash);
+            });
+            
             modelBuilder.Entity<RawMachineOcrModel>(rawMachineOcr =>
             {
                 rawMachineOcr.HasOne<ImageReferenceModel>().WithMany().HasForeignKey(x => x.ForImage);

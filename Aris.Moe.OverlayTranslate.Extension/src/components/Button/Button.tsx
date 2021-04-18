@@ -28,43 +28,43 @@ export class Button extends React.Component<any, ButtonState> {
     }
 
     render() {
-        const onClick = async () => {
-            console.log("buttoan");
-            let currentTab = await Helper.getCurrentActiveTabId();
-            
-            if (!this.state.contentScriptActive) {
-                chrome.runtime.sendMessage(new ActivateContentScriptCommand(currentTab))
-                this.setState({
-                    snowing: true,
-                    contentScriptActive: true
-                })
-                return;
-            }
-            
-            if (!this.state.snowing) {
-                chrome.tabs.sendMessage(currentTab, new ActivateContentScriptCommand(currentTab));
-                this.setState({
-                    snowing: true,
-                    contentScriptActive: true
-                })
-            }
-            else {
-                chrome.tabs.sendMessage(currentTab, new DeactivateContentScriptCommand(currentTab));
-                this.setState({
-                    snowing: false,
-                    contentScriptActive: true
-                })
-            }
-        };
-
         return (
             <div className="buttonContainer">
-                <button className="snowButton" onClick={async () => onClick()}>
-                    {this.state.snowing ? "Disable the snow 🥶" : "Let it snow! ❄️"}
+                <button className="snowButton" onClick={async () => this.handleClick()}>
+                    {this.state.snowing ? "Hide translation" : "Translate all images"}
                 </button>
             </div>
         );
     }
+    
+    private async handleClick() {
+        let currentTab = await Helper.getCurrentActiveTabId();
+
+        if (!this.state.contentScriptActive) {
+            chrome.runtime.sendMessage(new ActivateContentScriptCommand(currentTab))
+            this.setState({
+                snowing: true,
+                contentScriptActive: true
+            })
+            return;
+        }
+
+        if (!this.state.snowing) {
+            chrome.tabs.sendMessage(currentTab, new ActivateContentScriptCommand(currentTab));
+            this.setState({
+                snowing: true,
+                contentScriptActive: true
+            })
+        }
+        else {
+            chrome.tabs.sendMessage(currentTab, new DeactivateContentScriptCommand(currentTab));
+            this.setState({
+                snowing: false,
+                contentScriptActive: true
+            })
+        }
+    }
+    
 }
 
 export interface ButtonState {

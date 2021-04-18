@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Aris.Moe.OverlayTranslate.Server.DataAccess.Model;
 using Aris.Moe.OverlayTranslate.Server.Image;
 using Aris.Moe.OverlayTranslate.Server.Ocr.Machine;
@@ -14,7 +17,7 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
     {
         public static ImageReference ToBusinessModel(this ImageReferenceModel model)
         {
-            return new ImageReference(model.Id, model.Info.ToBusinessModel(), model.OriginalUrl, model.QualityScore);
+            return new(model.Id, model.Info.ToBusinessModel(), model.QualityScore);
         }
 
         public static ImageReferenceModel ToModel(this ImageReference model)
@@ -23,7 +26,15 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
             {
                 Id = model.Id,
                 Info = model.Info.ToModel(),
-                OriginalUrl = model.OriginalUrl,
+                Urls = new []
+                {
+                    new ImageUrl
+                    {
+                        ImageReferenceId = model.Id,
+                        OriginalUrl = model.OriginalUrl,
+                        UrlHash = model.OriginalUrl!.Sha256()
+                    }
+                },
                 QualityScore = model.QualityScore
             };
         }
@@ -154,6 +165,16 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
                     Text = x.Text
                 }).ToList()
             };
+        }
+    }
+
+    public static class HashHelper
+    {
+        public static byte[] Sha256(this string input)
+        {
+            using var hasher = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(input);
+            return hasher.ComputeHash(bytes);
         }
     }
 }

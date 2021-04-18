@@ -3,7 +3,7 @@ using Aris.Moe.Translate;
 
 namespace Aris.Moe.OverlayTranslate.Server.AspNetCore
 {
-    public class ApiConfiguration : BaseConfiguration, ITranslateConfig
+    public class ApiConfiguration : ServerConfiguration, ITranslateConfig
     {
         public bool Cache { get; set; } = false;
         public string? CacheFolderRoot { get; set; }

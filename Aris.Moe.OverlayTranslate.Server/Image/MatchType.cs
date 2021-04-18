@@ -8,5 +8,6 @@
         New,
         Hash,
         VisualHash,
+        Url
     }
 }

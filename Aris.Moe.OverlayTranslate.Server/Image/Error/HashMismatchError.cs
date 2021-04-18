@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
+using Aris.Moe.OverlayTranslate.Server.Image.Fetching.Error;
 
-namespace Aris.Moe.OverlayTranslate.Server.Error
+namespace Aris.Moe.OverlayTranslate.Server.Image.Error
 {
-    public class HashMismatchError : FluentResults.Error
+    public class HashMismatchError : CorrelatedError
     {
         public HashMismatchError(byte[] expectedHash, byte[] actualHash)
         {

@@ -1,5 +1,7 @@
 ﻿export class PublicOcrTranslationRequest {
     imageUrl!: string;
-    imageHash!: number[];
+    imageHash?: number[] | null;
+    height?: number;
+    width?: number;
     ApiKey?: string;
 }

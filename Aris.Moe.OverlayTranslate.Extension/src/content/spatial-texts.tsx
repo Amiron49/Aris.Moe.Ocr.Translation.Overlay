@@ -14,31 +14,4 @@ export class SpatialTexts extends React.Component<{ texts: SpatialTextViewModel[
             </div>
         );
     }
-
-    // render() {
-    //     return (
-    //         <div>
-    //             {this.props.texts.map((x,i) => <div key={i}>lel</div>)}
-    //         </div>
-    //     );
-    // }
-
-    // render() {
-    //     return (
-    //         <div>
-    //             {this.createFlakes()}
-    //         </div>
-    //     );
-    // }
-    //
-    // private createFlakes() {
-    //     let result = [];
-    //
-    //     for (const text of this.props.texts) {
-    //         //result.push(<SpatialText text={text}/>)
-    //         result.push(<SpatialText text={text}/>)
-    //     }
-    //    
-    //     return result;
-    // }
 }

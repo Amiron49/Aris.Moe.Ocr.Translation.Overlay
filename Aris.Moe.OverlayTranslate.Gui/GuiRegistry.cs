@@ -23,8 +23,8 @@ namespace Aris.Moe.OverlayTranslate.Gui
             For<IOverlay>().Use<OverlayTranslate.Gui.Overlay.Overlay>().Singleton();
             For<IOcr>().DecorateAllWith<OcrCoordinator>();
             For<ISpatialTextConsolidator>().Use<VerticalTextConsolidator>();
-            For<IOcr>().DecorateAllWith<OcrDebugCache>();
-            For<ITranslate>().DecorateAllWith<TranslateDebugCache>();
+            //For<IOcr>().DecorateAllWith<OcrDebugCache>();
+            //For<ITranslate>().DecorateAllWith<TranslateDebugCache>();
             Use<ProgressDisplay>().Singleton().For<IProgressDisplay>().For<IProgressDisplayGuiMode>();
         }
     }

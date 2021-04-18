@@ -1,6 +1,6 @@
 ﻿import QtQuick 2.6
 import QtQuick.Controls 2.1
-import Aris.Moe.Ocr.Overlay.Translate.Gui 1.1
+import Aris.Moe.OverlayTranslate.Gui.Qt5 1.1
 
 ScrollablePage {
     Column {

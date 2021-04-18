@@ -92,6 +92,12 @@ namespace Aris.Moe.OverlayTranslate.Server.Image.Fetching
 
         private long? GetContentLength(string domain, HttpResponseMessage responseMessage)
         {
+            if (!responseMessage.Content.Headers.Contains("Content-Length"))
+            {
+                _logger.LogWarning($"No content-length header from domain '{domain}'");
+                return null;
+            }
+            
             var contentLength = responseMessage.Content.Headers.GetValues("Content-Length").FirstOrDefault();
 
             if (string.IsNullOrEmpty(contentLength))
@@ -107,6 +113,37 @@ namespace Aris.Moe.OverlayTranslate.Server.Image.Fetching
             
             _logger.LogWarning($"Couldn't parse content-length header from domain '{domain}'. '{contentLength}'");
             return null;
+        }
+    }
+    
+    public class FileLoggingImageFetcher: IImageFetcher
+    {
+        private readonly IImageFetcher _imageFetcherImplementation;
+        private readonly ILogger<IImageFetcher> _logger;
+
+        public FileLoggingImageFetcher(IImageFetcher imageFetcherImplementation, ILogger<IImageFetcher> logger)
+        {
+            _imageFetcherImplementation = imageFetcherImplementation;
+            _logger = logger;
+        }
+
+        public async Task<Result<Stream>> Get(string url)
+        {
+            var result = await _imageFetcherImplementation.Get(url);
+            if (result.IsSuccess)
+            {
+                var tempFilePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+                _logger.LogInformation($"Writing copy of '{url}' to disk: {tempFilePath}");
+
+                result.Value.Position = 0;
+                using (var tempFileStream = new FileStream(tempFilePath, FileMode.Create))
+                {
+                    await result.Value.CopyToAsync(tempFileStream);
+                }
+                result.Value.Position = 0;
+            }
+            
+            return result;
         }
     }
 }

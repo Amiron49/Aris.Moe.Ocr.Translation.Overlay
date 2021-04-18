@@ -76,9 +76,12 @@ async function activateContentScriptForCurrentTab() {
         return;
     }
 
-    chrome.tabs.executeScript({
-        file: 'content.js'
+    chrome.scripting.executeScript({
+        files: ['content.js'],
+        target: {
+            tabId: currentTabId
+        }
     })
-
+    
     contentScriptState[currentTabId] = true;
 }

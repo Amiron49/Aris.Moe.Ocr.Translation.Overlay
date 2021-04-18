@@ -1,0 +1,7 @@
+﻿<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Api + TestImageServer" type="CompoundRunConfigurationType">
+    <toRun name="Aris.Moe.TestServer: Kestrel" type="LaunchSettings" />
+    <toRun name="Aris.Moe.OverlayTranslate.Api" type="LaunchSettings" />
+    <method v="2" />
+  </configuration>
+</component>

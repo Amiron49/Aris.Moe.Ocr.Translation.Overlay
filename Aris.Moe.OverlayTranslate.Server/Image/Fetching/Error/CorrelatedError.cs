@@ -6,6 +6,10 @@ namespace Aris.Moe.OverlayTranslate.Server.Image.Fetching.Error
     {
         private readonly string _correlationId = Guid.NewGuid().ToString();
 
+        public CorrelatedError()
+        {
+        }
+        
         public CorrelatedError(string message) : base(message)
         {
             Message += $"If you think this is an error on our side, please make a bug report with this correlationID: {_correlationId}";

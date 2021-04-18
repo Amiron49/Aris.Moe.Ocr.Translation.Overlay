@@ -1,56 +1,64 @@
 ﻿import * as ReactDOM from "react-dom";
 import * as React from "react";
 import {OcrTranslateResponse} from "./ocrTranslate/ocrTranslateResponse";
-import {SpatialTexts} from "./spatial-texts";
 import {
-    ForegroundOcrTranslateService
+    ForegroundOcrTranslateService, ResultResponse
 } from "./ocrTranslate/backgroundOcrTranslateService";
+import {Observable, Subject} from "rxjs";
+import {ImageOverlay} from "./image-overlay";
 
 export class Overlay {
 
-    private imageInfo?: HtmlImageInfo;
-
+    private imageInfo?: HtmlImageInfo | null;
+    private translationResultSubject : Subject<ResultResponse<OcrTranslateResponse>> = new Subject<ResultResponse<OcrTranslateResponse>>()
+    public translationResult : Observable<ResultResponse<OcrTranslateResponse>> = this.translationResultSubject;
+    
     constructor(
         public readonly parentContainer: HTMLDivElement,
         public readonly overlayTarget: HTMLImageElement
     ) {
     }
 
-    async attach() {
+    public async attach() {
         await this.waitForImageLoad(this.overlayTarget);
-        this.imageInfo = await HtmlImageInfo.create(this.overlayTarget)
-        let imageHash = Array.from(this.imageInfo.hash);
-        
-        console.log(imageHash);
-        
-        // let translation = await ForegroundOcrTranslateService.translatePublic({
-        //     imageHash: imageHash,
-        //     imageUrl: this.imageInfo.url
-        // })
-        //
-        // if (!translation.success) {
-        //     console.error(translation.message)
-        //     return;
-        // }
-        //
-        // let overlay = Overlay.crateSingleImageOverlay(this.overlayTarget, translation.result!)
-        // this.parentContainer.appendChild(overlay);
 
-       ForegroundOcrTranslateService.translatePublicSync({
+        let overlay = this.crateSingleImageOverlay(this.overlayTarget)
+        this.parentContainer.appendChild(overlay);
+        
+        try {
+            this.imageInfo = await HtmlImageInfo.create(this.overlayTarget)
+        }
+        catch (error) {
+            this.translationResultSubject.next({
+                result: null,
+                success: false,
+                message: "Extension encountered an error while loading the image:" + error.toString()
+            })
+        }
+        
+        if (this.imageInfo == null)
+        {
+            this.translationResultSubject.next({
+                result: null,
+                success: false,
+                message: "Extension couldn't load the image :<"
+            })
+            return;
+        }
+
+        let imageHash = this.imageInfo.hash ? Array.from(this.imageInfo.hash) : null;
+
+        ForegroundOcrTranslateService.translatePublicSync({
             imageHash: imageHash,
-            imageUrl: this.imageInfo.url
+            imageUrl: this.imageInfo.url,
+            height: this.imageInfo.height,
+            width: this.imageInfo.width
         }, response => {
-            if (!response.success || response.result?.machineTranslations.length == 0) {
-                console.error(response.message)
-                return;
-            }
-
-            let overlay = Overlay.crateSingleImageOverlay(this.overlayTarget, response.result!)
-            this.parentContainer.appendChild(overlay);
+            this.translationResultSubject.next(response);
         })
     }
 
-    waitForImageLoad(elem: HTMLImageElement): Promise<void> {
+    private waitForImageLoad(elem: HTMLImageElement): Promise<void> {
         if (elem.complete)
             return Promise.resolve();
 
@@ -64,7 +72,7 @@ export class Overlay {
         });
     }
 
-    private static crateSingleImageOverlay(targetElement: HTMLDivElement, translation: OcrTranslateResponse): HTMLDivElement {
+    private crateSingleImageOverlay(targetElement: HTMLDivElement): HTMLDivElement {
         let container = document.createElement("div");
         container.className = 'honyaku-image-overlay-container'
 
@@ -78,7 +86,7 @@ export class Overlay {
         container.style.width = `${boundingRectangle.width}px`;
         container.style.height = `${boundingRectangle.height}px`;
 
-        ReactDOM.render(<SpatialTexts texts={translation.machineTranslations[0].texts}/>, container);
+        ReactDOM.render(<ImageOverlay overlay={this}/>, container);
 
         return container;
     }
@@ -88,7 +96,7 @@ export class Overlay {
 class HtmlImageInfo {
     private constructor(
         public url: string,
-        public hash: Uint8Array,
+        public hash: Uint8Array | null,
         public width: number,
         public height: number,
         public htmlWidth: number,
@@ -96,16 +104,25 @@ class HtmlImageInfo {
     ) {
     }
 
-    public static async create(element: HTMLImageElement): Promise<HtmlImageInfo> {
+    public static async create(element: HTMLImageElement): Promise<HtmlImageInfo | null> {
 
         let imageContent = await this.imageToByteArray1(element);
-        let sha256 = await crypto.subtle.digest('SHA-256', imageContent);
-        let asArray = new Uint8Array(sha256);
+
+        let shaAsArray: Uint8Array | null = null;
+
+        // If the image has no bytes then that means the js cannot access the image due to CORS restrictions.
+        if (imageContent.byteLength != 0) {
+            let sha256 = await crypto.subtle.digest('SHA-256', imageContent);
+            shaAsArray = new Uint8Array(sha256);
+        }
+
         //todo check currentSrc
-        return new HtmlImageInfo(element.src, asArray, element.naturalWidth, element.naturalHeight, element.width, element.height)
+        return new HtmlImageInfo(element.src, shaAsArray, element.naturalWidth, element.naturalHeight, element.width, element.height)
     }
 
     public static async imageToByteArray1(element: HTMLImageElement): Promise<ArrayBuffer> {
-        return await (await fetch(element.src)).arrayBuffer()
+        return await (await fetch(element.src, {
+            mode: "cors"
+        })).arrayBuffer()
     }
 }
