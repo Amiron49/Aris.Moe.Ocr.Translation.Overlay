@@ -1,7 +1,10 @@
-﻿using Aris.Moe.OverlayTranslate.Configuration;
+﻿using Aris.Moe.Ocr;
+using Aris.Moe.OverlayTranslate.Configuration;
 using Aris.Moe.OverlayTranslate.Core;
 using Aris.Moe.OverlayTranslate.Server.Image;
 using Aris.Moe.OverlayTranslate.Server.Image.Fetching;
+using Aris.Moe.OverlayTranslate.Server.QuotaMonitoring;
+using Aris.Moe.Translate;
 using Lamar;
 
 namespace Aris.Moe.OverlayTranslate.Server
@@ -22,6 +25,19 @@ namespace Aris.Moe.OverlayTranslate.Server
             {
                 For<IImageFetcher>().DecorateAllWith<FileLoggingImageFetcher>();
             }
+
+            QuotaWatching();
+        }
+
+        public void QuotaWatching()
+        {
+            For<IQuotaConfig>().Add<GoogleOcrQuotaConfig>();
+            For<IQuotaConfig>().Add<DeeplQuotaConfig>();
+            For<IQuotaMonitor>().Add<OcrQuotaGuard>();
+            For<IQuotaMonitor>().Add<TranslateQuotaGuard>();
+            
+            For<IOcr>().DecorateAllWith<OcrQuotaGuard>();
+            For<ITranslate>().DecorateAllWith<TranslateQuotaGuard>();
         }
     }
 

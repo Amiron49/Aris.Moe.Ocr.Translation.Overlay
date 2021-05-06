@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite
 {
+    //dotnet ef migrations add --startup-project Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite --project Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite
     public class SqliteContext : OverlayTranslateServerContext
     {
         private readonly DatabaseConfiguration _databaseConfiguration;
@@ -38,11 +39,12 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite
         }
     }
     
+    // ReSharper disable once UnusedType.Global
     public class SqliteDesignTimeFactory : IDesignTimeDbContextFactory<SqliteContext>
     {
         public SqliteContext CreateDbContext(string[] args)
         {
-            return new SqliteContext(new DatabaseConfiguration()
+            return new SqliteContext(new DatabaseConfiguration
             {
                 ConnectionString = ":memory:",
             });

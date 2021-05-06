@@ -12,6 +12,7 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
         public DbSet<AddressableSpatialTextModel> SpatialTexts { get; set; } = null!;
         public DbSet<MachineTranslationModel> MachineTranslations { get; set; } = null!;
         public DbSet<VoteModel> Votes { get; set; } = null!;
+        public DbSet<QuotaUsageModel> QuotaUsages { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -62,6 +63,11 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
             {
                 vote.HasKey(x => new {x.For, x.UserId});
                 vote.Property(x => x.ChangedOn).ValueGeneratedOnAddOrUpdate();
+            });
+
+            modelBuilder.Entity<QuotaUsageModel>(quotaUsage =>
+            {
+                quotaUsage.HasIndex(x => x.Time);
             });
 
             base.OnModelCreating(modelBuilder);

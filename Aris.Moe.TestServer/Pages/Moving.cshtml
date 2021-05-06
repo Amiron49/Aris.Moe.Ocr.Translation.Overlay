@@ -1,0 +1,48 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<img id="image" style="width: 500px; position: relative" src="/Image/1"/>
+<img id="image2" style="width: 500px" src="/Image/1"/>
+
+<style>
+    #image2 {
+        animation: 3s linear 1s infinite alternate none running slidein;
+    }
+    
+    @@keyframes slidein {
+        from {
+        transform: translateX(0%);
+      }
+    
+      to {
+       transform: translateX(100%);
+      }
+    }
+    
+    
+</style>
+<script>
+    
+    function pos1() {
+    let image = document.getElementById("image");
+        image.style.left = "0px"; 
+    
+        window.setTimeout(() => {
+            pos2();
+        }, 3000)
+    }
+    
+    function pos2() {
+        let image = document.getElementById("image");
+        image.style.left = "500px"; 
+      window.setTimeout(() => {
+          pos1();
+      }, 3000)
+    }
+    
+        pos1();
+    
+</script>

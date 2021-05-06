@@ -12,13 +12,15 @@ namespace Aris.Moe.OverlayTranslate.Server.Image
             {
                 var hashMatch = HashHelper.ByteEqual(imageInfo.Sha256Hash, verificationCharacteristics.Hash);
 
-                if (!hashMatch)
-                    return new HashMismatchError(verificationCharacteristics.Hash, imageInfo.Sha256Hash);
+                if (hashMatch) 
+                    return null;
+                
+                return new HashMismatchError(verificationCharacteristics.Hash, imageInfo.Sha256Hash);
             }
 
             var expectedHeight = verificationCharacteristics.Height;
             var expectedWidth = verificationCharacteristics.Width;
-            
+        
             if (expectedHeight != imageInfo.Height || expectedWidth != imageInfo.Width)
                 return new ExpectedImageDimensionMismatchError(expectedWidth!.Value, expectedHeight!.Value, imageInfo.Width, imageInfo.Height);
 

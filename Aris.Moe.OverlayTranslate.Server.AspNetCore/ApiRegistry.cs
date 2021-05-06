@@ -5,6 +5,7 @@ using Aris.Moe.OverlayTranslate.Server.DataAccess.Model;
 using Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite;
 using Aris.Moe.OverlayTranslate.Server.Image;
 using Aris.Moe.OverlayTranslate.Server.Ocr;
+using Aris.Moe.OverlayTranslate.Server.QuotaMonitoring;
 using Aris.Moe.OverlayTranslate.Server.Translation;
 using Aris.Moe.Translate;
 using FluentResults;
@@ -33,6 +34,7 @@ namespace Aris.Moe.OverlayTranslate.Server.AspNetCore
             For<IImageReferenceRepository>().Use<ImageReferenceRepository>();
             For<IMachineOcrRepository>().Use<MachineOcrRepository>();
             For<ITranslationRepository>().Use<TranslationRepository>();
+            For<IQuotaRepository>().Use<QuotaRepository>();
             For<OverlayTranslateServerContext>().Use<SqliteContext>();
 
             For<IOnStartup>().Add<MigrateDataBase>();
