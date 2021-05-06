@@ -3,8 +3,8 @@ import * as React from "react";
 import {SpatialTextViewModel} from "./ocrTranslate/spatialTextViewModel";
 import {CSSProperties} from "react";
 
-export class SpatialText extends React.Component<{ spatialText: SpatialTextViewModel }, any> {
-    constructor(props: { spatialText: SpatialTextViewModel }) {
+export class SpatialText extends React.Component<{ spatialText: SpatialTextViewModel, xScale: number, yScale: number }, any> {
+    constructor(props: { spatialText: SpatialTextViewModel, xScale: number, yScale: number }) {
         super(props);
     }
 
@@ -15,7 +15,7 @@ export class SpatialText extends React.Component<{ spatialText: SpatialTextViewM
             </div>
         );
     }
-    
+
     shittyAutoFontSize(): number {
         let measurements = this.createMeasurements();
         let fontSize = 80;
@@ -30,22 +30,22 @@ export class SpatialText extends React.Component<{ spatialText: SpatialTextViewM
         div.innerText = this.props.spatialText.text;
 
         document.body.appendChild(div)
-        
+
         while (this.isOverflown(div) && fontSize > 1) {
             fontSize = fontSize - 1;
             div.style.fontSize = `${fontSize}px`;
         }
-        
+
         document.body.removeChild(div)
-        
+
         return fontSize;
     }
 
     isOverflown(element: HTMLElement): boolean {
         return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
     }
-    
-    createStyle(): CSSProperties{
+
+    createStyle(): CSSProperties {
         let measurements = this.createMeasurements();
         let fontSize = this.shittyAutoFontSize();
         return {
@@ -57,7 +57,7 @@ export class SpatialText extends React.Component<{ spatialText: SpatialTextViewM
             fontSize: fontSize
         }
     }
-    
+
     private createMeasurements(): {
         x: number,
         y: number,
@@ -69,10 +69,10 @@ export class SpatialText extends React.Component<{ spatialText: SpatialTextViewM
         let width = this.props.spatialText.position.bottomRight.x - x;
         let height = this.props.spatialText.position.bottomRight.y - y;
         return {
-            y: y,
-            x: x,
-            width: width,
-            height: height
+            y: y * this.props.yScale,
+            x: x * this.props.xScale,
+            width: width * this.props.xScale,
+            height: height * this.props.yScale
         }
     }
 }

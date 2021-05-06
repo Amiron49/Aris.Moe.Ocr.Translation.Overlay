@@ -9,10 +9,14 @@ import {ImageOverlay} from "./image-overlay";
 
 export class Overlay {
 
+    private overlay: HTMLDivElement | null = null;
     private imageInfo?: HtmlImageInfo | null;
-    private translationResultSubject : Subject<ResultResponse<OcrTranslateResponse>> = new Subject<ResultResponse<OcrTranslateResponse>>()
-    public translationResult : Observable<ResultResponse<OcrTranslateResponse>> = this.translationResultSubject;
-    
+    private translationResultSubject: Subject<ResultResponse<OcrTranslateResponse>> = new Subject<ResultResponse<OcrTranslateResponse>>()
+    public translationResult: Observable<ResultResponse<OcrTranslateResponse>> = this.translationResultSubject;
+    private resizeSubject: Subject<{ xScale: number, yScale: number }> = new Subject<{ xScale: number; yScale: number }>();
+    public onResize: Observable<{ xScale: number, yScale: number }> = this.resizeSubject;
+
+
     constructor(
         public readonly parentContainer: HTMLDivElement,
         public readonly overlayTarget: HTMLImageElement
@@ -22,22 +26,20 @@ export class Overlay {
     public async attach() {
         await this.waitForImageLoad(this.overlayTarget);
 
-        let overlay = this.crateSingleImageOverlay(this.overlayTarget)
-        this.parentContainer.appendChild(overlay);
-        
+        this.overlay = this.crateSingleImageOverlay(this.overlayTarget)
+        this.parentContainer.appendChild(this.overlay);
+
         try {
             this.imageInfo = await HtmlImageInfo.create(this.overlayTarget)
-        }
-        catch (error) {
+        } catch (error) {
             this.translationResultSubject.next({
                 result: null,
                 success: false,
                 message: "Extension encountered an error while loading the image:" + error.toString()
             })
         }
-        
-        if (this.imageInfo == null)
-        {
+
+        if (this.imageInfo == null) {
             this.translationResultSubject.next({
                 result: null,
                 success: false,
@@ -47,6 +49,9 @@ export class Overlay {
         }
 
         let imageHash = this.imageInfo.hash ? Array.from(this.imageInfo.hash) : null;
+
+        this.recalculateRendering();
+        this.startObserving();
 
         ForegroundOcrTranslateService.translatePublicSync({
             imageHash: imageHash,
@@ -76,22 +81,117 @@ export class Overlay {
         let container = document.createElement("div");
         container.className = 'honyaku-image-overlay-container'
 
-        let boundingRectangle = targetElement.getBoundingClientRect();
-
-        let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        container.style.left = `${scrollLeft + boundingRectangle.x}px`;
-        container.style.top = `${scrollTop + boundingRectangle.y}px`;
-        container.style.width = `${boundingRectangle.width}px`;
-        container.style.height = `${boundingRectangle.height}px`;
-
         ReactDOM.render(<ImageOverlay overlay={this}/>, container);
 
         return container;
     }
+
+    private static setPosition(target: HTMLDivElement, position: DivRectangle) {
+        target.style.left = `${position.x}px`;
+        target.style.top = `${position.y}px`;
+        target.style.width = `${position.width}px`;
+        target.style.height = `${position.height}px`;
+    }
+
+    private static getPosition(target: HTMLDivElement): DivRectangle {
+        let boundingRectangle = target.getBoundingClientRect();
+
+        let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        return new DivRectangle(
+            scrollLeft + boundingRectangle.x,
+            scrollTop + boundingRectangle.y,
+            boundingRectangle.width,
+            boundingRectangle.height);
+    }
+
+    private lastScale: { xScale: number, yScale: number } | null = null;
+    private lastPosition: DivRectangle | null = null;
+
+    private recalculateRendering() {
+        let newPosition = Overlay.getPosition(this.overlayTarget!);
+
+        if (this.lastPosition == null || !this.lastPosition.AreSame(newPosition)) {
+            Overlay.setPosition(this.overlay!, newPosition)
+            this.lastPosition = newPosition;
+        }
+
+        let newScale = Overlay.determineScale(this.overlayTarget, this.imageInfo!);
+
+        if (this.lastScale == null || this.lastScale.xScale != newScale.xScale || this.lastScale.yScale != newScale.yScale) {
+            this.resizeSubject.next(newScale);
+            this.lastScale = newScale;
+        }
+    }
+
+
+    private static determineScale(target: HTMLDivElement, imageInfo: HtmlImageInfo): { xScale: number, yScale: number } {
+        let boundingRectangle = target.getBoundingClientRect();
+        let xScale = boundingRectangle.width / imageInfo?.width;
+        let yScale = boundingRectangle.height / imageInfo?.height;
+
+        return {
+            xScale: xScale,
+            yScale: yScale
+        }
+    }
+
+    private startObserving() {
+        const config = {
+            attributes: true
+        };
+
+        const observer = new MutationObserver(mutations => {
+            this.recalculateRendering();
+        });
+
+        observer.observe(this.overlayTarget, config);
+        this.pollPositionChange();
+        // this.overlayTarget.addEventListener("transitionstart", ev => {
+        //     console.log("transitionstart")
+        //     this.onTargetProbablyMoved();
+        // })
+        // this.overlayTarget.addEventListener("transitionend", ev => {
+        //     console.log("transitionend")
+        //     this.onTargetProbablyMoved();
+        // })
+        // this.overlayTarget.addEventListener("transitioncancel", ev => {
+        //     console.log("transitioncancel")
+        //     this.onTargetProbablyMoved();
+        // })
+        //
+        // this.overlayTarget.addEventListener("transitionrun", ev => {
+        //     console.log("transitionrun")
+        //     this.onTargetProbablyMoved();
+        // })
+    }
+
+    private pollPositionChange() {
+        window.setTimeout(() => {
+            this.recalculateRendering();
+            this.pollPositionChange();
+        }, 1000);
+    }
 }
 
+
+export class DivRectangle {
+    constructor(
+        public x: number,
+        public y: number,
+        public width: number,
+        public height: number,
+    ) {
+    }
+
+    public AreSame(other: DivRectangle): boolean {
+        return this.x == other.x &&
+            this.y == other.y &&
+            this.width == other.width &&
+            this.height == other.height;
+    }
+}
 
 class HtmlImageInfo {
     private constructor(
@@ -121,8 +221,15 @@ class HtmlImageInfo {
     }
 
     public static async imageToByteArray1(element: HTMLImageElement): Promise<ArrayBuffer> {
-        return await (await fetch(element.src, {
-            mode: "cors"
-        })).arrayBuffer()
+        try {
+            let response = await fetch(element.src, {
+                mode: "cors"
+            })
+
+            return await (response).arrayBuffer()
+        } catch (error) {
+            return new ArrayBuffer(0)
+        }
+
     }
 }

@@ -9,19 +9,31 @@ import {LoadingSpinner} from "./loading/loading-spinner";
 import "./image-overlay.css"
 
 export class ImageOverlay extends React.Component<ImageOverlayProperties, ImageOverlayState> {
-    private subscription: Subscription
+    private translationSubscription: Subscription
+    private scaleSubscription: Subscription
 
     constructor(props: ImageOverlayProperties) {
         super(props);
-        this.subscription = props.overlay.translationResult.subscribe(x => {
-            this.setState({
-                translateResult: x
-            })
+        this.state = {
+            xScale: 1,
+            yScale: 1,
+            loadingAnimationDone: false
+        }
+        this.translationSubscription = props.overlay.translationResult.subscribe(x => {
+            let newState = {...this.state};
+            newState.translateResult = x;
+            this.setState(newState)
+        })
+        this.scaleSubscription = props.overlay.onResize.subscribe(x => {
+            let newState = {...this.state};
+            newState.xScale = x.xScale;
+            newState.yScale = x.yScale;
+            this.setState(newState)
         })
     }
 
     componentWillUnmount() {
-        this.subscription.unsubscribe();
+        this.translationSubscription.unsubscribe();
     }
 
 
@@ -30,7 +42,7 @@ export class ImageOverlay extends React.Component<ImageOverlayProperties, ImageO
             return (
                 <div className="honyaku-image-overlay">
                     {this.state.translateResult?.result?.machineTranslations[0].texts.map((x, i) => <SpatialText key={i}
-                                                                                                                 spatialText={x}/>)}
+                                                                                                                 spatialText={x} xScale={this.state.xScale} yScale={this.state.yScale}/>)}
                 </div>
             );
         }
@@ -68,5 +80,7 @@ export class ImageOverlayProperties {
 class ImageOverlayState {
     translateResult?: ResultResponse<OcrTranslateResponse>
     loadingAnimationDone = false;
+    xScale: number = 1;
+    yScale: number = 1;
 }
 
