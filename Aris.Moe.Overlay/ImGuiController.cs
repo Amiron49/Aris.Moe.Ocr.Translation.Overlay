@@ -14,6 +14,7 @@ namespace Aris.Moe.Overlay
     /// </summary>
     public class ImGuiController : IDisposable
     {
+        public static int FontPixels = 32;
         private readonly List<IDisposable> _ownedResources = new List<IDisposable>();
 
         // Image trackers
@@ -62,8 +63,7 @@ namespace Aris.Moe.Overlay
             ImGui.SetCurrentContext(context);
 
             //TODO config
-            const float sizePixels = 32f;
-            ImGui.GetIO().Fonts.AddFontFromFileTTF(GetTextFilePath(), sizePixels, null, ImGui.GetIO().Fonts.GetGlyphRangesJapanese());
+            ImGui.GetIO().Fonts.AddFontFromFileTTF(GetTextFilePath(), FontPixels, null, ImGui.GetIO().Fonts.GetGlyphRangesJapanese());
 
             CreateDeviceResources(gd, outputDescription);
             SetKeyMappings();

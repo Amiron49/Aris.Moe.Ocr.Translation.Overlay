@@ -98,8 +98,8 @@ namespace Aris.Moe.Overlay
         [DllImport("user32.dll", EntryPoint = "ShowWindow", SetLastError = true)]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-        [DllImport("user32.dll", EntryPoint = "ShowWindow", SetLastError = true)]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
+        // [DllImport("user32.dll", EntryPoint = "ShowWindow", SetLastError = true)]
+        // private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern int GetSystemMetrics(int nIndex);

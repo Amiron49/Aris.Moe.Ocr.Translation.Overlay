@@ -1,0 +1,30 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<button onclick="spawn()">Spawn</button>
+
+<div id="target">
+    
+</div>
+
+
+
+<script>
+    function spawn() {
+        let div = document.createElement("img");
+        div.src = "/Image/1";
+        
+        document.getElementById("target").appendChild(div);
+    }
+
+</script>
+
+<style>
+    img {
+        width: 250px;
+    }
+</style>
+

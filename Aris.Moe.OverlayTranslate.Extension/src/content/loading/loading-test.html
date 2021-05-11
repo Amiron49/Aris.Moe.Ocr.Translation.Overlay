@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .question-mark {
+            position: absolute;
+            height: 30%;
+        }
+
+        .exclamation-mark {
+            animation: 350ms infinite blink-and-slide;
+            left: 44%;
+            top: -61%;
+        }
+        
+        .question-marks-1 {
+            animation: 3s infinite blink-in-1;
+            left: -8%;
+            top: -4%;
+        }
+
+        .question-marks-2 {
+            animation: 3s infinite blink-in-2;
+            left: 38%;
+            top: -27%;
+        }
+
+        .question-marks-3 {
+            animation: 3s infinite blink-in-3;
+            right: -22%;
+            top: -10%;
+        }
+        
+        .body {
+            width: 100%;
+            position: relative;
+        }
+        
+        .loading-container {
+            position: relative;
+            width: 25em;
+        }
+        
+        @keyframes blink-in-1 {
+            from {
+                opacity: 0;
+            }
+            
+            25% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            75% {
+                opacity: 1;
+            }
+            
+            to {
+                opacity: 0;
+            }
+        }
+
+        @keyframes blink-in-2 {
+            from {
+                opacity: 0;
+            }
+            
+            25% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+            
+            75% {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
+        }
+        
+        @keyframes blink-in-3 {
+            from {
+                opacity: 0;
+            }
+
+            25% {
+                opacity: 0;
+            }
+            
+            50% {
+                opacity: 0;
+            }
+
+            75% {
+                opacity: 1;
+            }
+            
+            to {
+                opacity: 0;
+            }
+        }
+
+        @keyframes blink-and-slide {
+            from {
+                opacity: 0;
+                transform: translateY(100%);
+            }
+            
+            to {
+                opacity: 1;
+                transform: translateY(0%);
+            }
+        }
+
+    </style>
+</head>
+<body>
+<div class="loading-container">
+    <img class="question-mark exclamation-mark" src="./exclamation.png">
+    <img class="question-mark question-marks-1" src="./question.png">
+    <img class="question-mark question-marks-2" src="./questionquestion.png">
+    <img class="question-mark question-marks-3" src="./questionquestionquestion.png">
+    <img class="body" src="./honyaku-chan-upper-body.png">
+</div>
+</body>
+</html>
