@@ -20,7 +20,7 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
             {
                 reference.OwnsOne(x => x.Info, builder =>
                 {
-                    builder.HasIndex(x => x.Sha256Hash);
+                    builder.HasIndex(x => x.Sha256Hash).IsUnique();
                     builder.HasIndex(x => x.AverageHash);
                 });
                 

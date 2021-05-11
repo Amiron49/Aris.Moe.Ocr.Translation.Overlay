@@ -49,6 +49,7 @@ namespace Aris.Moe.OverlayTranslate.Gui.Qt5
         {
             var configurationProvider =
                 new ConfigurationBuilder()
+                    .AddEnvironmentVariables()
                     .AddJsonFile("appsettings.json", true)
                     .AddJsonFile("appsettings.Debug.json", true)
                     .AddCommandLine(args).Build();

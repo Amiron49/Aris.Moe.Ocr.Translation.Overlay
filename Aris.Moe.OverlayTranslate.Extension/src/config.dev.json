@@ -1,0 +1,4 @@
+﻿{
+  "endpoint": "https://localhost:5001/",
+  "development": true
+}

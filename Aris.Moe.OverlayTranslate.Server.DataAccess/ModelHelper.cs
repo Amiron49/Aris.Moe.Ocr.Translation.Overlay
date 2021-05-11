@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -26,9 +27,9 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess
             {
                 Id = model.Id,
                 Info = model.Info.ToModel(),
-                Urls = new []
+                Urls = new List<ImageUrl>()
                 {
-                    new ImageUrl
+                    new()
                     {
                         ImageReferenceId = model.Id,
                         OriginalUrl = model.OriginalUrl,

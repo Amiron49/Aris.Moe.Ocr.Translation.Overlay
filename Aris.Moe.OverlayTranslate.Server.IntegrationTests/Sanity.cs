@@ -20,19 +20,13 @@ namespace Aris.Moe.OverlayTranslate.Server.IntegrationTests
 {
     public class Sanity
     {
-        [Fact]
-        public async Task KindaWorks()
+        private async Task<Container> PrepareContainer()
         {
-            var tempDbFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".db");
-            
             var container = new Container(x =>
             {
                 x.IncludeRegistry(new ApiRegistry(new ApiConfiguration
                 {
-                    Database = new DatabaseConfiguration
-                    {
-                        ConnectionString = $"Data Source={tempDbFile}"
-                    }
+                    Database = new DatabaseConfiguration()
                 }));
                 x.For<ITranslate>().Use<DummyTranslate>();
                 x.For<IOcr>().Use<DummyOcr>();
@@ -45,6 +39,14 @@ namespace Aris.Moe.OverlayTranslate.Server.IntegrationTests
             foreach (var onStartup in allOnStartup)
                 await onStartup.OnStartup();
 
+            return container;
+        }
+
+        [Fact]
+        public async Task Translate_WishHash_Success()
+        {
+            using var container = await PrepareContainer();
+
             var analyzer = container.GetInstance<IImageAnalyser>();
             var service = container.GetInstance<IOverlayTranslateServer>();
             
@@ -53,13 +55,68 @@ namespace Aris.Moe.OverlayTranslate.Server.IntegrationTests
             using (var dummyImage = DummyFetcher.DummyImage())
                 testImageInfo = await analyzer.Analyse(dummyImage);
 
-            var translationResult = await service.TranslatePublic(new PublicOcrTranslationRequest()
+            var translationResult = await service.TranslatePublic(new PublicOcrTranslationRequest
             {
                 ImageHash = testImageInfo.Sha256Hash,
                 ImageUrl = "lel"
             });
 
             translationResult.Should().NotBeNull().And.BeSuccess();
+        }
+        
+        [Fact]
+        public async Task Translate_OnlyUrl_Success()
+        {
+            using var container = await PrepareContainer();
+
+            var analyzer = container.GetInstance<IImageAnalyser>();
+            var service = container.GetInstance<IOverlayTranslateServer>();
+            
+            ImageInfo testImageInfo;
+            // ReSharper disable once UseAwaitUsing
+            using (var dummyImage = DummyFetcher.DummyImage())
+                testImageInfo = await analyzer.Analyse(dummyImage);
+            
+            var translationResult = await service.TranslatePublic(new PublicOcrTranslationRequest
+            {
+                ImageUrl = "lel",
+                Height = testImageInfo.Height,
+                Width = testImageInfo.Width,
+            });
+
+            translationResult.Should().NotBeNull().And.BeSuccess();
+        }
+        
+        [Fact]
+        public async Task Translate_SameImageDifferentUrls_Success()
+        {
+            using var container = await PrepareContainer();
+
+            var analyzer = container.GetInstance<IImageAnalyser>();
+            var service = container.GetInstance<IOverlayTranslateServer>();
+            
+            ImageInfo testImageInfo;
+            // ReSharper disable once UseAwaitUsing
+            using (var dummyImage = DummyFetcher.DummyImage())
+                testImageInfo = await analyzer.Analyse(dummyImage);
+            
+            var translationResult = await service.TranslatePublic(new PublicOcrTranslationRequest
+            {
+                ImageUrl = "A",
+                Height = testImageInfo.Height,
+                Width = testImageInfo.Width,
+            });
+
+            translationResult.Should().NotBeNull().And.BeSuccess();
+            
+            var translationResult2 = await service.TranslatePublic(new PublicOcrTranslationRequest
+            {
+                ImageUrl = "B",
+                Height = testImageInfo.Height,
+                Width = testImageInfo.Width,
+            });
+
+            translationResult2.Should().NotBeNull().And.BeSuccess();
         }
     }
 

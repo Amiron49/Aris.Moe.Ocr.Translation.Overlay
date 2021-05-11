@@ -44,6 +44,11 @@ namespace Aris.Moe.OverlayTranslate.Server.Translation
             }
         }
 
+        public async Task<bool> AnyTranslations(Guid imageReferenceId)
+        {
+            return (await _translationRepository.GetMachineTranslations(imageReferenceId)).Any();
+        }
+        
         public Task<IEnumerable<MachineTranslation>> GetAllMachineTranslations(Guid imageReferenceId)
         {
             return _translationRepository.GetMachineTranslations(imageReferenceId);

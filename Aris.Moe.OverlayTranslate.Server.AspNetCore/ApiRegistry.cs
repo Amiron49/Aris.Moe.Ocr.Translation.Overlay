@@ -36,6 +36,7 @@ namespace Aris.Moe.OverlayTranslate.Server.AspNetCore
             For<ITranslationRepository>().Use<TranslationRepository>();
             For<IQuotaRepository>().Use<QuotaRepository>();
             For<OverlayTranslateServerContext>().Use<SqliteContext>();
+            For<ISqliteConnectionManager>().Use<InMemorySqliteConnectionManager>().Singleton();
 
             For<IOnStartup>().Add<MigrateDataBase>();
         }

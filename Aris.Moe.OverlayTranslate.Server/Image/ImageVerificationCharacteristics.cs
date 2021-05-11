@@ -1,6 +1,6 @@
 ﻿namespace Aris.Moe.OverlayTranslate.Server.Image
 {
-    public class ImageVerificationCharacteristics
+    public record ImageVerificationCharacteristics
     {
         public byte[]? Hash { get; set; }
         public int? Height { get; set; }

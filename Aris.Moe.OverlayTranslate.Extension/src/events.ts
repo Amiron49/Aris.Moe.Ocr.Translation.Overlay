@@ -1,8 +1,9 @@
 import {PublicOcrTranslationRequest} from "./content/ocrTranslate/publicOcrTranslationRequest";
 import {OcrTranslateResponse} from "./content/ocrTranslate/ocrTranslateResponse";
 import {ResultResponse} from "./content/ocrTranslate/backgroundOcrTranslateService";
-
-export type MessageTypes = "ActivateContentScript" | "DeactivateContentScript";
+import {IContentScriptState} from "./content/IContentScriptState";
+import {Mode} from "./content/mode";
+import {config} from "./helper";
 
 export interface IEvent {
     identifier: string;
@@ -10,14 +11,15 @@ export interface IEvent {
 
 export abstract class BaseEvent implements IEvent {
     protected constructor(public identifier: string) {
-        console.log(`Created ${this.identifier} event`);
+        if (config.development)
+            console.log(`Created ${this.identifier} event`);
     }
 }
 
 export class ActivateContentScriptCommand extends BaseEvent {
     static identifier: string = "ActivateContentScriptCommand";
 
-    constructor(public currentTab: number) {
+    constructor(public tabId: number) {
         super(ActivateContentScriptCommand.identifier);
     }
 }
@@ -25,7 +27,7 @@ export class ActivateContentScriptCommand extends BaseEvent {
 export class ActivateContentScriptEvent extends BaseEvent {
     static identifier: string = "ActivateContentScriptEvent";
 
-    constructor() {
+    constructor(public tabId: number) {
         super(ActivateContentScriptEvent.identifier);
     }
 }
@@ -54,15 +56,15 @@ export class ContentScriptUnloadEvent extends BaseEvent {
     }
 }
 
-export class IsActiveInTabQuery extends BaseEvent {
+export class IsActiveQuery extends BaseEvent {
     static identifier: string = "IsActiveInTabQuery";
 
-    constructor(public tabId: number) {
-        super(IsActiveInTabQuery.identifier);
+    constructor() {
+        super(IsActiveQuery.identifier);
     }
 }
 
-export type IsActiveInTabQueryResponse = {active: boolean, state: boolean}
+export type IsActiveInTabQueryResponse = { active: boolean, state: boolean }
 
 export class PublicTranslateQuery extends BaseEvent {
     static identifier: string = "PublicTranslateQuery";
@@ -73,3 +75,47 @@ export class PublicTranslateQuery extends BaseEvent {
 }
 
 export type PublicTranslateQueryResponse = ResultResponse<OcrTranslateResponse>
+
+export class ContentScriptStateQuery extends BaseEvent {
+    static identifier: string = "ContentScriptStateQuery";
+
+    constructor() {
+        super(ContentScriptStateQuery.identifier);
+    }
+}
+
+export type ContentScriptStateQueryResponse = IContentScriptState
+
+export class TranslateAllImagesCommand extends BaseEvent {
+    static identifier: string = "TranslateAllImagesCommand";
+
+    constructor() {
+        super(TranslateAllImagesCommand.identifier);
+    }
+}
+
+export class SetOverlayVisibilityCommand extends BaseEvent {
+    static identifier: string = "SetOverlayVisibilityCommand";
+
+    constructor(public visible: boolean) {
+        super(SetOverlayVisibilityCommand.identifier);
+    }
+}
+
+export class SetOverlayModeCommand extends BaseEvent {
+    static identifier: string = "SetOverlayModeCommand";
+
+    constructor(public mode: Mode) {
+        super(SetOverlayModeCommand.identifier);
+    }
+}
+
+export class InWhatTabAmIQuery extends BaseEvent {
+    static identifier: string = "InWhatTabAmIQuery";
+
+    constructor() {
+        super(InWhatTabAmIQuery.identifier);
+    }
+}
+
+export type InWhatTabAmIQueryResponse = number;

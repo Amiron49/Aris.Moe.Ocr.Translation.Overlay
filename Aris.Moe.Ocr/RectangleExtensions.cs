@@ -6,7 +6,8 @@ namespace Aris.Moe.Ocr
     {
         public static bool IsInDistance(this Rectangle a, Rectangle b, double distance)
         {
-            var halfDistance = distance / 2;
+            // var halfDistance = distance / 2;
+            var halfDistance = distance / 1.75;
 
             var aCopy = Rectangle.Inflate(a, (int) halfDistance, (int) halfDistance);
             var bCopy = Rectangle.Inflate(b, (int) halfDistance, (int) halfDistance);

@@ -12,13 +12,9 @@ namespace Aris.Moe.OverlayTranslate.Core
         {
             For<IGoogleConfiguration>().Use(baseConfiguration.Google);
             For<IDeeplConfiguration>().Use(baseConfiguration.Deepl);
-            For<INeedConfiguration>().Add<GoogleTranslate>();
-            //For<INeedConfiguration>().Add<GoogleOcr>();
             
-            For<ITranslate>().Use<GoogleTranslate>();
-            //For<ITranslate>().DecorateAllWith<TranslateDebugCache>();
+            For<ITranslate>().Use<DeeplTranslate>();
             For<IOcr>().Use<GoogleOcr>();
-            //For<IOcr>().DecorateAllWith<OcrDebugCache>();
 
             For<ISpatialTextConsolidator>().Use<VerticalTextConsolidator>();
         }

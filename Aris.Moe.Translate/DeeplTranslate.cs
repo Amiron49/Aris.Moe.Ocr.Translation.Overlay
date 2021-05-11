@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Aris.Moe.Configuration;
@@ -7,25 +8,30 @@ using Microsoft.Extensions.Logging;
 
 namespace Aris.Moe.Translate
 {
-    public class DeeplTranslate : ITranslate
+    public class DeeplTranslate : ITranslate, INeedConfiguration
     {
+        private readonly IDeeplConfiguration _deeplConfiguration;
         private readonly ILogger<DeeplTranslate> _logger;
-        private readonly DeepLClient _client;
+        private readonly Lazy<DeepLClient> _client;
 
         public DeeplTranslate(IDeeplConfiguration deeplConfiguration, ILogger<DeeplTranslate> logger)
         {
+            _deeplConfiguration = deeplConfiguration;
             _logger = logger;
-            _client = new DeepLClient(deeplConfiguration.ApiKey);
+            _client = new Lazy<DeepLClient>(() => new DeepLClient(deeplConfiguration.ApiKey));
         }
 
         public Task<IEnumerable<Translation>> Translate(IEnumerable<string> originals, string? targetLanguage = "en", string? inputLanguage = null)
         {
+            if (inputLanguage == "und")
+                inputLanguage = null;
+            
             return TranslateInternal(originals.ToList(), targetLanguage, inputLanguage);
         }
 
         private async Task<IEnumerable<Translation>> TranslateInternal(IList<string> originals, string? targetLanguage = "en", string? inputLanguage = null)
         {
-            var translated = (await _client.TranslateAsync(originals, inputLanguage?.ToUpperInvariant(), targetLanguage?.ToUpperInvariant())).ToList();
+            var translated = (await _client.Value.TranslateAsync(originals, inputLanguage?.ToUpperInvariant(), targetLanguage?.ToUpperInvariant())).ToList();
 
             if (translated.Count != originals.Count())
             {
@@ -44,6 +50,13 @@ namespace Aris.Moe.Translate
             }
 
             return result;
+        }
+
+        public string Name { get; } = "DeeplTranslate";
+        public IEnumerable<string> GetConfigurationIssues()
+        {
+            if (string.IsNullOrWhiteSpace(_deeplConfiguration.ApiKey))
+                yield return "Missing api Key";
         }
     }
 }

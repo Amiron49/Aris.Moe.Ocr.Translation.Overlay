@@ -24,7 +24,8 @@ namespace Aris.Moe.Translate
 
             _translateClientLazy = new Lazy<TranslationServiceClient>(() => new TranslationServiceClientBuilder
             {
-                CredentialsPath = googleConfiguration.KeyPath
+                CredentialsPath = googleConfiguration.KeyPath,
+                JsonCredentials = googleConfiguration.Key
             }.Build());
         }
 
@@ -35,6 +36,9 @@ namespace Aris.Moe.Translate
 
         private async Task<IEnumerable<Translation>> TranslateInternal(IList<string> originals, string? targetLanguage = "en", string? inputLanguage = null)
         {
+            if (inputLanguage == "und")
+                inputLanguage = null;
+            
             var googleTranslations = await TranslateWithGoogle(originals, targetLanguage, inputLanguage);
 
             if (googleTranslations.Count != originals.Count)
@@ -83,10 +87,10 @@ namespace Aris.Moe.Translate
 
         public IEnumerable<string> GetConfigurationIssues()
         {
-            if (string.IsNullOrEmpty(_googleConfiguration.KeyPath))
-                yield return $"'{nameof(IGoogleConfiguration.KeyPath)}': is not set. A private key enabled to access the V3Translation Api is needed";
-            else if (!File.Exists(_googleConfiguration.KeyPath))
-                yield return $"Couldn't find google key file @ {_googleConfiguration.KeyPath}. A private key enabled to access the V3Translation Api is needed";
+            if (string.IsNullOrEmpty(_googleConfiguration.Key) && string.IsNullOrEmpty(_googleConfiguration.KeyPath))
+                yield return $"'{nameof(IGoogleConfiguration.Key)}': is not set. A private key enabled to access the V3Translation Api is needed";
+            if (string.IsNullOrEmpty(_googleConfiguration.Key) && !File.Exists(_googleConfiguration.KeyPath))
+                yield return $"Couldn't find google key file @ {_googleConfiguration.Key}. A private key enabled to access the V3Translation Api is needed";
 
             if (string.IsNullOrEmpty(_googleConfiguration.LocationId))
                 yield return

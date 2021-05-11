@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Aris.Moe.OverlayTranslate.Server.Image;
 using Aris.Moe.OverlayTranslate.Server.Image.Error;
 using Aris.Moe.OverlayTranslate.Server.Ocr;
+using Aris.Moe.OverlayTranslate.Server.Ocr.Machine;
 using Aris.Moe.OverlayTranslate.Server.Translation;
 using Aris.Moe.OverlayTranslate.Server.ViewModel;
 using FluentResults;
@@ -35,51 +37,95 @@ namespace Aris.Moe.OverlayTranslate.Server
 
         public async Task<Result<OcrTranslateResponse?>> TranslatePublic(PublicOcrTranslationRequest request)
         {
-            var quickLookupResult = await Lookup(request);
-
-            if (quickLookupResult.Value != null)
-                return quickLookupResult;
-
             var verificationCharacteristics = ImageVerificationCharacteristics.From(request);
-
             var verificationErrors = _imageVerification.VerifyCharacteristics(verificationCharacteristics);
 
             if (verificationErrors != null)
                 return Result.Fail(verificationErrors);
 
+            var imageReferenceMatch = await LookupImage(request);
+            var status = await GetImageStatus(imageReferenceMatch?.reference);
+
+            if (imageReferenceMatch != null && status.HasOcr && status.HasTranslation)
+                return await GetResponseForCompletelyProcessedImage(imageReferenceMatch.Value.reference.Id, imageReferenceMatch.Value.type);
+
+            if (imageReferenceMatch == null)
+            {
+                if (request.ImageHash != null)
+                    return await TranslatePublicByHash(request, verificationCharacteristics);
+
+                return await TranslatePublicByUrlOnly(request, verificationCharacteristics);
+            }
+            
+            return await HandleIncompleteKnownImage(imageReferenceMatch.Value.reference, request.ImageUrl, verificationCharacteristics, imageReferenceMatch.Value.type);
+        }
+
+        private async Task<Result<OcrTranslateResponse?>> TranslatePublicByHash(PublicOcrTranslationRequest request, ImageVerificationCharacteristics verificationCharacteristics)
+        {
             var requestedImageResult = await TryFetchImage(request.ImageUrl, verificationCharacteristics);
 
             if (requestedImageResult.IsFailed)
                 return requestedImageResult.ToResult();
 
-            var requestImage = requestedImageResult.Value!.Value!;
+            var (reference, content) = requestedImageResult.Value;
 
-            await SaveImage(requestImage.Reference);
-            
-            if (!_serverOptions.ConsiderPerceptualHashes)
-                return await ProcessNewImage(requestImage);
-
-            return await WeighAgainstPerceptualSameImages(requestImage);
+            return await HandleNewImage(reference, content);
         }
 
-        private async Task SaveImage(ImageReference requestImageReference)
+        private async Task<Result<OcrTranslateResponse?>> TranslatePublicByUrlOnly(PublicOcrTranslationRequest request, ImageVerificationCharacteristics verificationCharacteristics)
         {
-            var existingByHash = await _imageReferenceRepository.Get(requestImageReference.Info.Sha256Hash);
-            if (existingByHash != null)
-            {
-                await _imageReferenceRepository.AddUrl(existingByHash.Id, requestImageReference.OriginalUrl!);
-                return;
-            }
-            
-            await _imageReferenceRepository.Save(requestImageReference);
+            var requestedImageResult = await TryFetchImage(request.ImageUrl, verificationCharacteristics);
+
+            if (requestedImageResult.IsFailed)
+                return requestedImageResult.ToResult();
+
+            var (reference, content) = requestedImageResult.Value;
+
+            var knownMatchingImage = await _imageReferenceRepository.Get(requestedImageResult.Value.Reference.Info.Sha256Hash);
+
+            if (knownMatchingImage == null)
+                return await HandleNewImage(reference, content);
+
+            await _imageReferenceRepository.AddUrl(knownMatchingImage.Id, request.ImageUrl);
+
+            return await HandlePotentiallyIncompleteKnownImage(knownMatchingImage, content, MatchType.Hash);
         }
 
-        private async Task<Result<OcrTranslateResponse?>> Lookup(PublicOcrTranslationRequest request)
+        private async Task<Result<OcrTranslateResponse?>> HandleNewImage(ImageReference reference, Stream content)
         {
-            if (request.ImageHash != null)
-                return await HashLookup(request);
+            reference = await _imageReferenceRepository.Save(reference);
+            var ocr = await _ocrService.MachineOcrImage(reference, content);
+            await _translationService.MachineTranslate(ocr);
 
-            return await UrlLookup(request);
+            return await GetResponseForCompletelyProcessedImage(reference.Id, MatchType.New);
+        }
+
+        private async Task<Result<OcrTranslateResponse?>> HandleIncompleteKnownImage(ImageReference reference, string url,
+            ImageVerificationCharacteristics imageVerificationCharacteristics, MatchType matchType)
+        {
+            var requestedImageResult = await TryFetchImage(url, imageVerificationCharacteristics with {Hash = reference.Info.Sha256Hash});
+
+            if (requestedImageResult.IsFailed)
+                return requestedImageResult.ToResult();
+
+            var (_, content) = requestedImageResult.Value;
+
+            return await HandlePotentiallyIncompleteKnownImage(reference, content, matchType);
+        }
+
+        private async Task<Result<OcrTranslateResponse?>> HandlePotentiallyIncompleteKnownImage(ImageReference reference, Stream content, MatchType matchType)
+        {
+            var allOcr = (await _ocrService.GetConsolidatedMachineOcr(reference.Id)).ToList();
+
+            if (!allOcr.Any())
+                allOcr = new List<ConsolidatedMachineAddressableOcr> {await _ocrService.MachineOcrImage(reference, content)};
+
+            var anyTranslations = await _translationService.AnyTranslations(reference.Id);
+
+            if (!anyTranslations)
+                await _translationService.MachineTranslate(allOcr.First(x => x.Provider == MachineOcrProvider.Google));
+
+            return await GetResponseForCompletelyProcessedImage(reference.Id, matchType);
         }
 
         public async Task<Result<OcrTranslateResponse?>> UrlLookup(IUrlLookup request)
@@ -91,7 +137,59 @@ namespace Aris.Moe.OverlayTranslate.Server
 
             var highestQuality = await GetHighestQuality(knownImageByUrl.Info.Sha256Hash);
 
-            return await GetResponseForKnownImage(highestQuality!.Id, MatchType.Url);
+            return await GetResponseForCompletelyProcessedImage(highestQuality!.Id, MatchType.Url);
+        }
+
+        public async Task<(ImageReference reference, MatchType type)?> LookupImage(PublicOcrTranslationRequest request)
+        {
+            if (request.ImageHash != null)
+            {
+                var hashMatch = await _imageReferenceRepository.Get(request.ImageHash);
+                if (hashMatch == null)
+                    return null;
+
+                return (hashMatch, MatchType.Hash);
+            }
+
+            var urlMatch = await _imageReferenceRepository.Get(request.ImageUrl);
+            if (urlMatch == null)
+                return null;
+
+            return (urlMatch, MatchType.Url);
+        }
+
+        public async Task<ImageStatus> GetImageStatus(ImageReference? reference)
+        {
+            if (reference == null)
+            {
+                return new ImageStatus
+                {
+                    HasOcr = false,
+                    HasTranslation = false,
+                    IsKnown = false
+                };
+            }
+
+            var hasOcr = await _ocrService.AnyMachineOcr(reference.Id);
+
+            if (!hasOcr)
+            {
+                return new ImageStatus
+                {
+                    IsKnown = true,
+                    HasOcr = false,
+                    HasTranslation = false
+                };
+            }
+
+            var hasTranslation = await _translationService.AnyTranslations(reference.Id);
+
+            return new ImageStatus
+            {
+                IsKnown = true,
+                HasOcr = true,
+                HasTranslation = hasTranslation
+            };
         }
 
         public async Task<Result<OcrTranslateResponse?>> HashLookup(IHashLookup request)
@@ -101,7 +199,7 @@ namespace Aris.Moe.OverlayTranslate.Server
             if (knownImage == null)
                 return Result.Ok<OcrTranslateResponse?>(null);
 
-            return await GetResponseForKnownImage(knownImage.Id, MatchType.Hash);
+            return await GetResponseForCompletelyProcessedImage(knownImage.Id, MatchType.Hash);
         }
 
         /// <summary>
@@ -122,7 +220,7 @@ namespace Aris.Moe.OverlayTranslate.Server
             return allRelated.OrderByDescending(x => x.QualityScore).First();
         }
 
-        private async Task<Result<OcrTranslateResponse?>> ProcessNewImage((ImageReference Reference, Stream Content) requestImage)
+        private async Task<Result<OcrTranslateResponse?>> TranslateImage((ImageReference Reference, Stream Content) requestImage)
         {
             var machineOcr = await _ocrService.MachineOcrImage(requestImage.Reference, requestImage.Content);
 
@@ -131,7 +229,7 @@ namespace Aris.Moe.OverlayTranslate.Server
 
             await _translationService.MachineTranslate(machineOcr);
 
-            return await GetResponseForKnownImage(requestImage.Reference.Id, MatchType.New);
+            return await GetResponseForCompletelyProcessedImage(requestImage.Reference.Id, MatchType.New);
         }
 
         private async Task<Result<OcrTranslateResponse?>> WeighAgainstPerceptualSameImages((ImageReference Reference, Stream Content) requestImage)
@@ -139,18 +237,18 @@ namespace Aris.Moe.OverlayTranslate.Server
             var visualHashMatches = (await _imageReferenceRepository.GetAll(requestImage.Reference.Info)).Where(x => x.Id != requestImage.Reference.Id).ToList();
 
             if (!visualHashMatches.Any())
-                return await ProcessNewImage(requestImage);
+                return await TranslateImage(requestImage);
 
             var highestQualityMatch = visualHashMatches.OrderByDescending(x => x.QualityScore).First();
             var newFileIsHigherQuality = requestImage.Reference.QualityScore > highestQualityMatch.QualityScore;
 
             if (newFileIsHigherQuality)
-                return await ProcessNewImage(requestImage);
+                return await TranslateImage(requestImage);
 
-            return await GetResponseForKnownImage(highestQualityMatch.Id, MatchType.VisualHash);
+            return await GetResponseForCompletelyProcessedImage(highestQualityMatch.Id, MatchType.VisualHash);
         }
 
-        private async Task<Result<OcrTranslateResponse?>> GetResponseForKnownImage(Guid id, MatchType matchType)
+        private async Task<Result<OcrTranslateResponse?>> GetResponseForCompletelyProcessedImage(Guid id, MatchType matchType)
         {
             var imageReference = await _imageReferenceRepository.Get(id);
 
@@ -168,12 +266,12 @@ namespace Aris.Moe.OverlayTranslate.Server
             return Result.Ok<OcrTranslateResponse?>(ocrTranslateResponse);
         }
 
-        private async Task<Result<(ImageReference Reference, Stream Content)?>> TryFetchImage(string url, ImageVerificationCharacteristics verificationCharacteristics)
+        private async Task<Result<(ImageReference Reference, Stream Content)>> TryFetchImage(string url, ImageVerificationCharacteristics verificationCharacteristics)
         {
             var fetchImageResult = await _imageFetcher.Get(url);
 
             if (fetchImageResult.IsFailed)
-                return fetchImageResult.ToResult<(ImageReference Reference, Stream Content)?>();
+                return fetchImageResult.ToResult<(ImageReference Reference, Stream Content)>();
 
             var imageFactoryResult = await _imageFactory.Create(url, fetchImageResult.Value);
 
@@ -188,9 +286,16 @@ namespace Aris.Moe.OverlayTranslate.Server
             var verificationError = _imageVerification.Verify(image, verificationCharacteristics);
 
             if (verificationError == null)
-                return Result.Ok<(ImageReference Reference, Stream Content)?>((image, fetchImageResult.Value));
+                return Result.Ok<(ImageReference Reference, Stream Content)>((image, fetchImageResult.Value));
 
             return Result.Fail(verificationError);
         }
+    }
+
+    public class ImageStatus
+    {
+        public bool IsKnown { get; set; }
+        public bool HasOcr { get; set; }
+        public bool HasTranslation { get; set; }
     }
 }

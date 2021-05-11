@@ -57,9 +57,14 @@ namespace Aris.Moe.OverlayTranslate.Server.Ocr
             return consolidatedMachineOcr;
         }
 
-        public Task<IEnumerable<ConsolidatedMachineAddressableOcr>> GetConsolidatedMachineOcr(Guid knownImageId)
+        public async Task<IEnumerable<ConsolidatedMachineAddressableOcr>> GetConsolidatedMachineOcr(Guid knownImageId)
         {
-            return _machineOcrRepository.GetConsolidated(knownImageId);
+            return await _machineOcrRepository.GetConsolidated(knownImageId);
+        }
+        
+        public async Task<bool> AnyMachineOcr(Guid knownImageId)
+        {
+            return (await GetConsolidatedMachineOcr(knownImageId)).Any();
         }
     }
 }

@@ -21,7 +21,8 @@ namespace Aris.Moe.Ocr
 
             _ocrClientLazy = new Lazy<ImageAnnotatorClient>(() => new ImageAnnotatorClientBuilder
             {
-                CredentialsPath = googleConfiguration.KeyPath
+                CredentialsPath = googleConfiguration.KeyPath,
+                JsonCredentials = googleConfiguration.Key
             }.Build());
         }
 
@@ -29,6 +30,9 @@ namespace Aris.Moe.Ocr
         {
             var googleResult = await OcrFromGoogle(image, inputLanguage);
 
+            if (googleResult.Count == 0)
+                return (new List<ISpatialText>(), "und");
+            
             var singleCharacterAnnotations = googleResult.Skip(1);
 
             var asSpatialTexts = singleCharacterAnnotations.Select(ConvertToSpatialText).ToList();
@@ -69,9 +73,9 @@ namespace Aris.Moe.Ocr
         public string Name { get; } = "Google Ocr V3";
         public IEnumerable<string> GetConfigurationIssues()
         {
-            if (string.IsNullOrEmpty(_googleConfiguration.KeyPath))
-                yield return $"'{nameof(IGoogleConfiguration.KeyPath)}': is not set. A private key enabled to access the Google Ocr V3 Api is needed";
-            else if (!File.Exists(_googleConfiguration.KeyPath))
+            if (string.IsNullOrEmpty(_googleConfiguration.Key) && string.IsNullOrEmpty(_googleConfiguration.KeyPath))
+                yield return $"'{nameof(IGoogleConfiguration.Key)}': is not set. A private key enabled to access the Google Ocr V3 Api is needed";
+            if (string.IsNullOrEmpty(_googleConfiguration.Key) && !File.Exists(_googleConfiguration.KeyPath))
                 yield return $"Couldn't find google key file @ {_googleConfiguration.KeyPath}. A private key enabled to access the Google Ocr Api is needed";
         }
     }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json;
-using Aris.Moe.OverlayTranslate.Configuration;
 using Aris.Moe.OverlayTranslate.Server.DataAccess.Model;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -10,19 +10,16 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite
     //dotnet ef migrations add --startup-project Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite --project Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite
     public class SqliteContext : OverlayTranslateServerContext
     {
-        private readonly DatabaseConfiguration _databaseConfiguration;
+        private readonly ISqliteConnectionManager _sqliteConnectionManager;
 
-        public SqliteContext(DatabaseConfiguration databaseConfiguration)
+        public SqliteContext(ISqliteConnectionManager sqliteConnectionManager)
         {
-            _databaseConfiguration = databaseConfiguration;
-            if (_databaseConfiguration.ConnectionString == null)
-                // ReSharper disable once CA2208
-                throw new ArgumentNullException(nameof(databaseConfiguration.ConnectionString));
+            _sqliteConnectionManager = sqliteConnectionManager;
         }
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite(_databaseConfiguration.ConnectionString!);
+            optionsBuilder.UseSqlite(_sqliteConnectionManager.Connection);
 
             base.OnConfiguring(optionsBuilder);
         }
@@ -44,10 +41,30 @@ namespace Aris.Moe.OverlayTranslate.Server.DataAccess.Sqlite
     {
         public SqliteContext CreateDbContext(string[] args)
         {
-            return new SqliteContext(new DatabaseConfiguration
-            {
-                ConnectionString = ":memory:",
-            });
+            return new(new InMemorySqliteConnectionManager());
+        }
+    }
+
+    public interface ISqliteConnectionManager : IDisposable
+    {
+        SqliteConnection Connection { get; }
+    }
+
+    public class InMemorySqliteConnectionManager : ISqliteConnectionManager
+    {
+        public SqliteConnection Connection => new("Data Source=file:lel?mode=memory&cache=shared");
+        
+        private readonly SqliteConnection _keepAliveConnection;
+        
+        public InMemorySqliteConnectionManager()
+        {
+            _keepAliveConnection = Connection;
+            _keepAliveConnection.Open();
+        }
+        
+        public void Dispose()
+        {
+            _keepAliveConnection.Dispose();
         }
     }
 }

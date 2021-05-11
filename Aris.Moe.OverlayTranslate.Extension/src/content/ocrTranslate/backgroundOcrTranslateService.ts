@@ -1,10 +1,11 @@
 ﻿import {PublicOcrTranslationRequest} from "./publicOcrTranslationRequest";
 import {OcrTranslateResponse} from "./ocrTranslateResponse";
-import {PublicTranslateQuery, PublicTranslateQueryResponse} from "../../types";
+import {PublicTranslateQuery, PublicTranslateQueryResponse} from "../../events";
+import {config} from "../../helper";
 
 export class BackgroundOcrTranslateService {
     static async translatePublic(request: PublicOcrTranslationRequest): Promise<ResultResponse<OcrTranslateResponse>> {
-        let url = 'https://localhost:5001/TranslateOcr/public';
+        let url = `${config.endpoint}TranslateOcr/public`;
         
         let body = JSON.stringify(request);
         let responseMessage: Response;
