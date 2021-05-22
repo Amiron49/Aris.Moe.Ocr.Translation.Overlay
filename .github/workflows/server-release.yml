@@ -1,0 +1,37 @@
+name: Server Release
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - 'server-v*'
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2 
+      - name: Setup .Net 5.0.6
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.6'
+      - run: dotnet test
+  build_server_and_push:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: amiron49/honyaku-api:{{ github.ref }}
+          file: Aris.Moe.OverlayTranslate.Server.AspNetCore/Dockerfile
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}

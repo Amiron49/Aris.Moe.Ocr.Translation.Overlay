@@ -1,0 +1,58 @@
+name: Extension Release
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - 'extension-v*'
+
+jobs:
+  build_extension:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node 
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - working-directory: Aris.Moe.OverlayTranslate.Extension
+        run: npm install
+      - working-directory: Aris.Moe.OverlayTranslate.Extension
+        run: npm run build
+      - run: sudo apt install zip
+      - name: ZippidyZap
+        run: zip -r chrome-extension.zip ./Aris.Moe.OverlayTranslate.Extension/dist
+      - name: Upload chrome extension as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: chrome-extension
+          path: chrome-extension.zip
+          if-no-files-found: error
+  create_release:
+    needs: build_extension
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download chrome-extension
+        uses: actions/download-artifact@v2
+        with:
+          name: chrome-extension
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Extension Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./chrome-extension.zip
+          asset_name: chrome-extension-${{ github.ref }}.zip
+          asset_content_type: application/zip
