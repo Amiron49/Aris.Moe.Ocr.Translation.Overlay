@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2 
-      - name: Setup .Net 5.0.6
+      - name: Setup .Net 5.0.203
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '5.0.6'
+          dotnet-version: '5.0.203'
       - run: dotnet test
   build_server_and_push:
     runs-on: ubuntu-20.04
