@@ -4,6 +4,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{AD368D5C-9
 ProjectSection(SolutionItems) = preProject
 	Readme.md = Readme.md
 	.gitignore = .gitignore
+	.github\workflows\extension-release.yml = .github\workflows\extension-release.yml
+	.github\workflows\gui-release.yml = .github\workflows\gui-release.yml
+	.github\workflows\server-release.yml = .github\workflows\server-release.yml
 EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aris.Moe.Overlay", "Aris.Moe.Overlay\Aris.Moe.Overlay.csproj", "{D968365B-89B0-4884-AA35-9689D7B91138}"
