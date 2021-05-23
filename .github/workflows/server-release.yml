@@ -17,6 +17,7 @@ jobs:
           dotnet-version: '5.0.203'
       - run: dotnet test
   build_server_and_push:
+    needs: test
     runs-on: ubuntu-20.04
     steps:
       - name: Get the tag name
