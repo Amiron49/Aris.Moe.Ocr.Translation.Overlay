@@ -1,6 +1,6 @@
 ﻿# Honyaku Translation Overlay
 
-Do you like gibberish machine translations? Did you ever want that compounded by the unreliable nature of OCR? Then this is the project for you! The aim of this project is simple: Provide a hassle free way of translating the content of images to english and overlay the translation.
+Did you ever ask yourself, what would happen if we took the gibberish machine translations produced and threw them together with the unreliable nature of OCR? Then this is the browser extension for you! The aim of this project is simple: Provide a hassle-free way of translating the content of images to English and displaying it as an overlay.
 
 OCR is handled by google cloud vision and translating by Deepl.
 
