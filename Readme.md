@@ -13,7 +13,7 @@ Either create an issue, contact me via email `honyaku-github@aris.moe` or discor
 
 ## Honyaku Chrome Extension
 
-[Will insert chrome web store link here once it is approved]
+[On Chrome Web Store](https://chrome.google.com/webstore/detail/honyaku-chan-image-transl/pkaedgkafbbpafajggmngigalibhaoad)
 
 Is a small and simple extension that is capable of translating any **publicly hosted** image free of charge into english. In theory. My own use case of japanese to english works but for other languages I may need to change a bit in the server so I don't keep sending non translatable images to Deepl.
 
