@@ -1,6 +1,6 @@
 export class ArrayHelper {
-    public static except<T>(something: T[], except: T[]): T[] {
-        return something.filter(x => !except.find(y => y == x));
+    public static except<T>(something: T[], except: T[], subSelector: (element: T) => any): T[] {
+        return something.filter(x => !except.find(y => subSelector(y) == subSelector(x)));
     }
 
     public static toArray<T extends Element>(something: HTMLCollectionOf<T>): T[] {

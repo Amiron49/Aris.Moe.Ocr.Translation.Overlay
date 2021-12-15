@@ -63,17 +63,32 @@ export class Overlay {
         this.recalculateRendering();
         this.startObserving();
 
-        console.log(`${this.counter} requesting translation for ${this.imageInfo.url}`)
-        
-        ForegroundOcrTranslateService.translatePublicSync({
-            imageHash: imageHash,
-            imageUrl: this.imageInfo.url,
-            height: this.imageInfo.height,
-            width: this.imageInfo.width
-        }, response => {
-            this.translationResultSubject.next(response);
-        })
+        console.info(`${this.counter} requesting translation for ${this.imageInfo.url}`)
 
+        this.delayedTranslationRequest(imageHash);
+    }
+
+    private delayedTranslationTimeOut: number | undefined;
+    private alreadyCalledTranslation: boolean = false;
+
+    private delayedTranslationRequest(imageHash: any) {
+        this.delayedTranslationTimeOut = window.setTimeout(() => {
+            this.alreadyCalledTranslation = true;
+            ForegroundOcrTranslateService.translatePublicSync({
+                imageHash: imageHash,
+                imageUrl: this.imageInfo!.url,
+                height: this.imageInfo!.height,
+                width: this.imageInfo!.width
+            }, response => {
+                this.translationResultSubject.next(response);
+            })
+        }, 10);
+    }
+    
+    private cancelTranslationRequest() {
+        if (!this.alreadyCalledTranslation) {
+            window.clearTimeout(this.delayedTranslationTimeOut)
+        }
     }
 
     private waitForCurrentSrcToBeSet(elem: HTMLImageElement): Promise<boolean> {
@@ -144,7 +159,6 @@ export class Overlay {
             return;
 
         if (this.overlayTarget.src != this.imageInfo?.url) {
-            console.log("detected image loss. detaching")
             this.detach();
             return;
         }
@@ -203,8 +217,7 @@ export class Overlay {
     private checkForTargetLoss() {
         let isTargetLost = this.isTargetLost();
         if (isTargetLost) {
-            console.info("target loss detected")
-            this.onTargetLoss(this);
+            this.onTargetLossInternal();
         }
     }
 
@@ -232,6 +245,12 @@ export class Overlay {
         return false;
     }
 
+    private onTargetLossInternal(){
+        this.cancelTranslationRequest();
+        this.detach();
+        this.onTargetLoss(this);
+    }
+    
     public detach() {
         if (this.detaching)
             return;
@@ -245,11 +264,16 @@ export class Overlay {
             this.mutationObserver.disconnect();
 
         if (this.overlay != null && this.parentContainer.contains(this.overlay)) {
-            this.parentContainer.removeChild(this.overlay);
+            let removed = this.parentContainer.removeChild(this.overlay);
+            
+            if (!removed)
+                console.error(`removed nothing during detach of ${this.imageInfo?.url}`)
+            
+        }else {
+            console.error(`didnt find overlay in parent container for ${this.imageInfo?.url}`)
         }
     }
 }
-
 
 export class DivRectangle {
     constructor(

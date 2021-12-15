@@ -1,0 +1,4 @@
+.error-message {
+    mix-blend-mode: difference;
+    color: rgb(0 0 0);
+}
