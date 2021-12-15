@@ -169,21 +169,22 @@ class ContentScriptManager implements IContentScriptController {
     async translateAllImages(): Promise<void> {
         let images = document.getElementsByTagName('img');
         let allImages = ArrayHelper.toArray(images).filter(x => (!x.className || x.className.indexOf("honyaku") < 0));
-        let newImages = ArrayHelper.except(allImages, this.overlays.map(x => x.overlayTarget));
 
+        let existingImageTargets = this.overlays.map(x => x.overlayTarget);
+        let newImages = ArrayHelper.except(allImages, existingImageTargets, element => element.src);
         for (const image of newImages) {
-            //todo make detach flow less retarded. This should call detach no the overlay by itself.
             let newOverlay = new Overlay(this.overlayContainer, image, overlay => {
-                overlay.detach();
                 let index = this.overlays.indexOf(overlay);
-                this.overlays.splice(index);
+                this.overlays.splice(index, 1);
             }, this.counter++)
-            newOverlay.attach();
             this.overlays.push(newOverlay);
+            newOverlay.attach();
         }
     }
 
 }
+
+
 
 let honyakuContentScriptManager: IContentScriptController;
 

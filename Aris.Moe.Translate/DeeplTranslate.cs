@@ -45,7 +45,6 @@ namespace Aris.Moe.Translate
             {
                 var translation = translated[i];
                 var original = originals[i];
-                _logger.LogInformation(translation.Text);
                 result.Add(new Translation(translation.Text, original));
             }
 

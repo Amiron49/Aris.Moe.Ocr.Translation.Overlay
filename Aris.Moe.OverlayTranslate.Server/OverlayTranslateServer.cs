@@ -95,7 +95,10 @@ namespace Aris.Moe.OverlayTranslate.Server
         {
             reference = await _imageReferenceRepository.Save(reference);
             var ocr = await _ocrService.MachineOcrImage(reference, content);
-            await _translationService.MachineTranslate(ocr);
+            var result = await _translationService.MachineTranslate(ocr);
+
+            if (result == null)
+                return Result.Ok((OcrTranslateResponse?) null).WithSuccess("No texts were recognized");
 
             return await GetResponseForCompletelyProcessedImage(reference.Id, MatchType.New);
         }
@@ -225,7 +228,7 @@ namespace Aris.Moe.OverlayTranslate.Server
             var machineOcr = await _ocrService.MachineOcrImage(requestImage.Reference, requestImage.Content);
 
             if (machineOcr.Language == "en")
-                return Result.Fail<OcrTranslateResponse?>("Image is already in english.");
+                return Result.Fail<OcrTranslateResponse?>(new AlreadyInEnglishOCRError());
 
             await _translationService.MachineTranslate(machineOcr);
 
@@ -255,7 +258,7 @@ namespace Aris.Moe.OverlayTranslate.Server
             var machineOcr = (await _ocrService.GetConsolidatedMachineOcr(imageReference!.Id)).ToList();
 
             if (machineOcr!.First().Language == "en")
-                return Result.Fail<OcrTranslateResponse?>("Image is already in english.");
+                return Result.Fail<OcrTranslateResponse?>(new AlreadyInEnglishOCRError());
 
             var machineTranslations = await _translationService.GetAllMachineTranslations(imageReference.Id);
 

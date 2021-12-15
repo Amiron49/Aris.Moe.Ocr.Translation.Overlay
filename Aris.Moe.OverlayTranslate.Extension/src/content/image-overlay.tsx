@@ -40,7 +40,7 @@ export class ImageOverlay extends React.Component<ImageOverlayProperties, ImageO
     render() {
         if (this.state?.loadingAnimationDone && this.state?.translateResult?.success === true) {
             return (
-                <div className="honyaku-image-overlay">
+                <div className="honyaku-image-overlay" data-debug-src={this.props.overlay.overlayTarget.src}>
                     {this.state.translateResult?.result?.machineTranslations[0].texts.map((x, i) => <SpatialText key={i}
                                                                                                                  spatialText={x} xScale={this.state.xScale} yScale={this.state.yScale}/>)}
                 </div>

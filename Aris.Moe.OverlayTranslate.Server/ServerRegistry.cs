@@ -15,6 +15,7 @@ namespace Aris.Moe.OverlayTranslate.Server
         {
             IncludeRegistry(new OverlayTranslateRegistry(baseConfiguration));
             For<IOverlayTranslateServer>().Use<OverlayTranslateServer>();
+            For<IOverlayTranslateServer>().DecorateAllWith<ConcurrentTranslationRequestMitigatingServer>();
             For<IImageFactory>().Use<ImageFactory>();
             For<IImageFetcher>().Use<ImageFetcher>();
             For<IImageAnalyser>().Use<ImageAnalyser>();
@@ -24,6 +25,7 @@ namespace Aris.Moe.OverlayTranslate.Server
             if (baseConfiguration.Image.LogImages)
             {
                 For<IImageFetcher>().DecorateAllWith<FileLoggingImageFetcher>();
+                For<IOverlayTranslateServer>().DecorateAllWith<LoggingOverlayTranslateServer>();
             }
 
             QuotaWatching();
