@@ -2,7 +2,7 @@
   "name": "Honyaku-chan image translation",
   "description": "Translate and overlay any public image! Powered by GoogleOCR and Deepl",
   "manifest_version": 3,
-  "version": "1.0.0",
+  "version": "1.0.2",
   "icons": {
     "128": "icon.png"
   },
