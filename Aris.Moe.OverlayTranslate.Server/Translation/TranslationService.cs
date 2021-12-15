@@ -19,7 +19,7 @@ namespace Aris.Moe.OverlayTranslate.Server.Translation
             _translationRepository = translationRepository;
         }
 
-        public async Task<MachineTranslation> MachineTranslate(ConsolidatedMachineAddressableOcr source)
+        public async Task<MachineTranslation?> MachineTranslate(ConsolidatedMachineAddressableOcr source)
         {
             var translated = await _translate.Translate(source.Texts.Select(x => x.Text), "en", source.Language);
 
